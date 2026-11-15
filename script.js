@@ -1,15 +1,48 @@
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYq86oX-ODzvY5f19B_N27er7lHYRbC9_bx98PaCwNpEcXPEuHa3Uf_8FCKEa2Zcw/exec";
+/* ─────────────────────────────────────────────────────────────
+   CONFIG — อ่านค่าจาก config.js
+   ───────────────────────────────────────────────────────────── */
+const APP_CONFIG = Object.assign({
+  googleScriptUrl: "",
+  siteUrl: "",
+  defaultTheme: "dark",
+  requestTimeoutMs: 20000,
+  tesseractCdn: "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"
+}, (typeof window !== "undefined" && window.APP_CONFIG) || {});
+
+const GOOGLE_SCRIPT_URL = String(APP_CONFIG.googleScriptUrl || "").trim();
+const BACKEND_READY = /^https?:\/\//i.test(GOOGLE_SCRIPT_URL);
+const DEFAULT_TIMEOUT_MS = Number(APP_CONFIG.requestTimeoutMs) > 0 ? Number(APP_CONFIG.requestTimeoutMs) : 20000;
+
 const DRAFT_KEY = "cs69_draft_v1";
 const THEME_KEY = "theme";
 const SESSION_KEY = "cs69_admin_session";
 const ADMIN_IDLE_MS = 30 * 60 * 1000;
+
+// LocalStorage Wrapper (สำหรับ Safari Private Mode)
+const storage = (() => {
+  try {
+    const probe = "__cs69_probe__";
+    const ls = window["localStorage"];
+    ls.setItem(probe, "1");
+    ls.removeItem(probe);
+    return ls;
+  } catch (e) {
+    const mem = new Map();
+    return {
+      getItem: k => (mem.has(k) ? mem.get(k) : null),
+      setItem: (k, v) => { mem.set(k, String(v)); },
+      removeItem: k => { mem.delete(k); },
+      get length() { return mem.size; },
+      key: i => (Array.from(mem.keys())[i] ?? null)
+    };
+  }
+})();
 
 // 🆕 ฟังก์ชันสำหรับเรียกใช้ Custom Modal (รองรับการใส่รูปภาพ)
 let customModalCallback = null;
 function showCustomModal(title, text, isConfirm = false, type = "success", imageUrl = null) {
   $("customModalTitle").textContent = title;
   
-  // ถ้ามีรูปภาพ (เช่น สลิป) ให้แสดงใน Modal ด้วย
   let imageHtml = "";
   if (imageUrl && imageUrl.startsWith("http")) {
     imageHtml = `<div style="margin-bottom: 16px; text-align: center;">
@@ -57,11 +90,12 @@ function handleCustomModalOk() {
   }
 }
 
-const PRICE_RULES = { surcharge: { "2XL": 10 } };
+// 🆕 อัปเดตราคาให้รองรับ 2XL, 3XL ฯลฯ
+const PRICE_RULES = { surcharge: { "2XL": 10, "3XL": 10, "4XL": 10, "5XL": 10 } };
 function computePrice(basePrice, size, allow2XL) {
   const base = +basePrice || 0;
   let extra = PRICE_RULES.surcharge[size] || 0;
-  if (allow2XL === false && size === "2XL") extra = 0;
+  if (allow2XL === false && ["2XL", "3XL", "4XL", "5XL"].includes(size)) extra = 0;
   return { base, extra, total: base + extra };
 }
 
@@ -82,7 +116,8 @@ const escapeHTML = v => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({ "
 const newIdempotencyKey = () => crypto.randomUUID ? crypto.randomUUID() : "idem-" + Date.now() + "-" + Math.random().toString(36).slice(2);
 const debounce = (fn, ms) => { let t; return function () { clearTimeout(t); const a = arguments, ctx = this; t = setTimeout(() => fn.apply(ctx, a), ms); }; };
 
-async function fetchWithTimeout(url, options = {}, ms = 20000) {
+async function fetchWithTimeout(url, options = {}, ms = DEFAULT_TIMEOUT_MS) {
+  if (!BACKEND_READY) throw new Error("ยังไม่ได้ตั้งค่า googleScriptUrl ใน config.js");
   const c = new AbortController();
   const t = setTimeout(() => c.abort(), ms);
   try { const r = await fetch(url, { ...options, signal: c.signal }); if (!r.ok) throw new Error("HTTP " + r.status); return r; }
@@ -106,7 +141,8 @@ function fileToBase64_(file) {
 }
 
 // ─────────────── THEME / MENU ───────────────
-if (localStorage.getItem(THEME_KEY) === "light") {
+const savedTheme = storage.getItem(THEME_KEY) || APP_CONFIG.defaultTheme || "dark";
+if (savedTheme === "light") {
   document.body.classList.remove("dark-mode");
   $("themeText").textContent = "Dark Mode";
   if ($("themeSwitch")) $("themeSwitch").checked = false;
@@ -127,17 +163,17 @@ function toggleTheme() {
   if (b.classList.contains("dark-mode")) {
     tt.textContent = "Light Mode"; sw.checked = true;
     ti.innerHTML = '<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>';
-    localStorage.setItem(THEME_KEY, "dark");
+    storage.setItem(THEME_KEY, "dark");
   } else {
     tt.textContent = "Dark Mode"; sw.checked = false;
     ti.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
-    localStorage.setItem(THEME_KEY, "light");
+    storage.setItem(THEME_KEY, "light");
   }
 }
 function closeModal(id) { $(id).style.display = "none"; }
 function openTrackModal() {
   $("trackModal").style.display = "flex";
-  $("trackPhoneConfirm").value = ""; $("otpInput").value = ""; $("trackPinInput").value = "";
+  $("trackPhone").value = ""; $("trackPhoneConfirm").value = ""; $("otpInput").value = ""; $("trackPinInput").value = "";
   $("trackResult").className = "status-result"; $("trackResult").style.display = "none";
   $("trackStage1").style.display = "block"; $("trackStage2").style.display = "none";
   state.pendingTrackOrderId = null; state.trackToken = null;
@@ -149,15 +185,15 @@ function goBackFromHistory() { $("screen-history").style.display = "none"; $("sc
 
 // ─────────────── DRAFT ───────────────
 function saveDraft() {
-  try { localStorage.setItem(DRAFT_KEY, JSON.stringify({
+  try { storage.setItem(DRAFT_KEY, JSON.stringify({
     backName: $("backName").value, backNumber: $("backNumber").value,
     firstName: $("firstName").value, lastName: $("lastName").value,
     customerEmail: $("customerEmail").value, phone: $("phone").value,
     customerPin: $("customerPin").value, classRoom: $("classRoom").value, style: state.style, size: state.size
   })); } catch (e) {}
 }
-function loadDraft() { try { const r = localStorage.getItem(DRAFT_KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
-function dismissDraft() { localStorage.removeItem(DRAFT_KEY); $("draftBanner").classList.remove("show"); }
+function loadDraft() { try { const r = storage.getItem(DRAFT_KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+function dismissDraft() { storage.removeItem(DRAFT_KEY); $("draftBanner").classList.remove("show"); }
 function restoreDraft() {
   const d = loadDraft(); if (!d) return;
   $("backName").value = d.backName || ""; $("backNumber").value = d.backNumber || "";
@@ -166,7 +202,8 @@ function restoreDraft() {
   $("customerPin").value = d.customerPin || ""; $("classRoom").value = d.classRoom || "";
   if (d.style) {
     state.style = d.style;
-    if (d.style === "เสื้อสี" || d.style === "เสื้อฟุตบอล") state.basePrice = 289;
+    // 🆕 เช็กสินค้าใหม่
+    if (["เสื้อสี", "เสื้อฟุตบอล", "เสื้อฟุตบอลม.ต้น", "เสื้อประตูมัธยมศึกษาตอนต้น", "เสื้อประตูมัธยมศึกษาตอนปลาย"].includes(d.style)) state.basePrice = 289;
     else if (d.style === "กางเกงฟุตบอล") state.basePrice = 149;
     else state.basePrice = 279;
     state.allow2XL = d.style !== "กางเกงฟุตบอล";
@@ -214,6 +251,23 @@ const SlipValidator = {
   }
 };
 
+let tesseractLoaderPromise = null;
+function loadTesseract() {
+  if (window.Tesseract) return Promise.resolve(window.Tesseract);
+  if (tesseractLoaderPromise) return tesseractLoaderPromise;
+  const src = String(APP_CONFIG.tesseractCdn || "").trim();
+  tesseractLoaderPromise = new Promise((resolve, reject) => {
+    if (!src) { reject(new Error("ยังไม่ได้ตั้งค่า tesseractCdn ใน config.js")); return; }
+    const s = document.createElement("script");
+    s.src = src;
+    s.async = true;
+    s.onload = () => (window.Tesseract ? resolve(window.Tesseract) : reject(new Error("โหลด Tesseract ไม่สำเร็จ")));
+    s.onerror = () => { tesseractLoaderPromise = null; reject(new Error("โหลดตัวอ่านสลิปจาก CDN ไม่สำเร็จ")); };
+    document.head.appendChild(s);
+  });
+  return tesseractLoaderPromise;
+}
+
 async function analyzeSlip(file) {
   $("aiScannerBox").style.display = "block";
   $("aiStatusText").style.display = "block";
@@ -223,7 +277,8 @@ async function analyzeSlip(file) {
   checkFormValid();
   let worker;
   try {
-    worker = await Tesseract.createWorker("eng");
+    const TesseractLib = await loadTesseract();
+    worker = await TesseractLib.createWorker("eng");
     const result = await worker.recognize(file);
     const text = result?.data?.text || "";
     state.slipOCR = text;
@@ -245,7 +300,10 @@ async function analyzeSlip(file) {
     state.slipOCRDone = true;
   } catch (err) {
     state.slipOCRDone = true;
-    $("aiStatusText").textContent = "OCR ทำงานไม่สำเร็จ";
+    // 🆕 ถ้า OCR พัง ให้เซ็ตยอดเป็น null เพื่อให้คนส่งได้ (รอแอดมินตรวจ)
+    state.slipAmount = null; 
+    state.slipRef = "";
+    $("aiStatusText").innerHTML = "AI อ่านไม่สำเร็จ <strong>(ไม่เป็นไร ส่งให้แอดมินตรวจได้เลย)</strong>";
   } finally {
     if (worker) try { await worker.terminate(); } catch (_) {}
     checkFormValid();
@@ -309,9 +367,16 @@ function selectProductFromModal() {
   if (!selectedProductFromModal) return;
   closeModal("productModal");
   state.style = selectedProductFromModal;
-  if (selectedProductFromModal === "เสื้อสี" || selectedProductFromModal === "เสื้อฟุตบอล") { state.basePrice = 289; state.allow2XL = true; }
-  else if (selectedProductFromModal === "กางเกงฟุตบอล") { state.basePrice = 149; state.allow2XL = false; }
-  else { state.basePrice = 279; state.allow2XL = true; }
+  // 🆕 อัปเดตราคาให้ตรงกับสินค้าใหม่
+  if (["เสื้อสี", "เสื้อฟุตบอล", "เสื้อฟุตบอลม.ต้น", "เสื้อประตูมัธยมศึกษาตอนต้น", "เสื้อประตูมัธยมศึกษาตอนปลาย"].includes(selectedProductFromModal)) { 
+    state.basePrice = 289; state.allow2XL = true; 
+  }
+  else if (selectedProductFromModal === "กางเกงฟุตบอล") { 
+    state.basePrice = 149; state.allow2XL = false; 
+  }
+  else { 
+    state.basePrice = 279; state.allow2XL = true; 
+  }
   const calc = computePrice(state.basePrice, state.size, state.allow2XL);
   state.surcharge = calc.extra; state.price = calc.total;
   updateSummary(); checkFormValid(); saveDraft();
@@ -357,9 +422,16 @@ function checkFormValid() {
   if (!$("classRoom").value) { ok = false; missing.push("ห้องเรียน"); }
   if (!state.slipFile) { ok = false; missing.push("สลิปโอนเงิน"); }
   if ($("customerPin").value.replace(/\D/g,"").length !== 4) { ok = false; missing.push("PIN 4 หลัก"); }
-  if (state.slipFile && $("aiToggle").checked && !state.slipOCRDone) { ok = false; missing.push("รอ OCR ตรวจยอด"); }
+  
+  // 🆕 ลบเงื่อนไขบังคับรอ OCR ออกแล้ว เพื่อให้สามารถส่งได้แม้ AI จะอ่านไม่ได้
+
   const btn = $("submitBtn"), err = $("errorMsg");
-  if (isPhoneDuplicate) err.innerHTML = "<span style='color:#dc3545;font-weight:bold;'>เบอร์นี้เคยสั่งแล้ว หากต้องการสั่งเพิ่มจริงๆ ให้กดปุ่มยืนยันด้านบน</span>";
+  if (!BACKEND_READY) {
+    err.innerHTML = "<span style='color:#dc3545;font-weight:bold;'>ระบบยังไม่ได้เชื่อมต่อ backend — กรุณาตั้งค่า googleScriptUrl ใน config.js</span>";
+    btn.disabled = true;
+    return;
+  }
+  if (isPhoneDuplicate) err.innerHTML = "<span style='color:#dc3545;font-weight:bold;'>เบอร์นี้เคยสั่งแล้ว! หากต้องการสั่งเพิ่มจริงๆ ให้กดปุ่มยืนยันด้านบน</span>";
   else err.textContent = ok ? "" : "กรุณาแก้ไข: " + missing.join(", ");
   btn.disabled = !ok || state.submitLocked;
 }
@@ -395,7 +467,7 @@ $("submitBtn").addEventListener("click", async () => {
       headers: { "Content-Type": "text/plain;charset=utf-8" }
     }, { retries: 1, ms: 60000 })).json();
     if (!r || r.status !== "success") throw new Error((r && r.message) || "บันทึกไม่สำเร็จ");
-    localStorage.removeItem(DRAFT_KEY);
+    storage.removeItem(DRAFT_KEY);
     $("screen-form").style.display = "none";
     $("screen-success").style.display = "block";
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -444,8 +516,20 @@ async function shareTicket() {
     }
   });
 }
+function buildShareUrl(search) {
+  const base = String(APP_CONFIG.siteUrl || "").trim();
+  let url;
+  if (base) {
+    url = new URL(base, window.location.href);
+  } else {
+    const path = window.location.pathname.replace(/index\.html?$/i, "") || "/";
+    url = new URL(path, window.location.origin);
+  }
+  url.search = search;
+  return url.toString();
+}
 function shareOrderLink(id) {
-  const url = window.location.origin + window.location.pathname + "?order=" + encodeURIComponent(id);
+  const url = buildShareUrl("?order=" + encodeURIComponent(id));
   if (navigator.share) navigator.share({ title: "ติดตาม " + id, url }).catch(() => {});
   else copyToClipboard(url, "คัดลอกลิงก์แล้ว");
 }
@@ -468,7 +552,7 @@ function resetForm() {
   $("slipDrop").classList.remove("has-file"); $("slipInput").value = "";
   $("submitBtn").classList.remove("loading"); $("submitBtn").textContent = "ยืนยันการสั่งซื้อ"; $("submitBtn").disabled = true;
   $("shareRow").style.display = "none";
-  localStorage.removeItem(DRAFT_KEY);
+  storage.removeItem(DRAFT_KEY);
   updateSummary(); checkFormValid(); window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -519,7 +603,7 @@ async function requestTrackOtp() {
     startOtpCooldown(60);
   } catch (e) {
     resDiv.className = "status-result error";
-    resDiv.innerHTML = "เกิดข้อผิดพลาด: " + e.message + "<br><br><a href='https://line.me/ti/p/qx4pTpyFEH' target='_blank' style='color:#0d6efd;text-decoration:underline;'> กดที่นี่เพื่อติดต่อแอดมินทาง LINE</a>";
+    resDiv.innerHTML = "เกิดข้อผิดพลาด: " + e.message + "<br><br><a href='https://line.me/ti/p/qx4pTpyFEH' target='_blank' style='color:#0d6efd;text-decoration:underline;'>👉 กดที่นี่เพื่อติดต่อแอดมินทาง LINE</a>";
   } finally { btn.textContent = orig; btn.disabled = false; }
 }
 function startOtpCooldown(sec) {
@@ -638,10 +722,10 @@ function resetAdminIdle() {
 }));
 $("logoSlot").addEventListener("dblclick", async () => {
   $("adminModal").style.display = "flex"; $("adminPass").value = "";
-  const session = localStorage.getItem(SESSION_KEY);
+  const session = storage.getItem(SESSION_KEY);
   if (!session) { showAdminLogin(); return; }
   const ok = await verifySession(session);
-  if (ok) showAdminPanel(); else { localStorage.removeItem(SESSION_KEY); showAdminLogin(); }
+  if (ok) showAdminPanel(); else { storage.removeItem(SESSION_KEY); showAdminLogin(); }
 });
 function showAdminLogin() {
   $("adminLoginBox").style.display = "block"; $("adminOrderBox").style.display = "none";
@@ -652,7 +736,7 @@ function showAdminPanel() {
   resetAdminIdle(); switchAdminTab("orders"); loadAdminOrders(1);
 }
 function logoutAdmin() {
-  localStorage.removeItem(SESSION_KEY);
+  storage.removeItem(SESSION_KEY);
   state.adminOrders = []; state.adminName = "";
   showAdminLogin(); toast("ออกจากระบบแล้ว", "success");
 }
@@ -687,7 +771,7 @@ async function loginAdmin() {
       headers: { "Content-Type": "text/plain;charset=utf-8" }
     }, { retries: 1, ms: 15000 })).json();
     if (r.status === "success" && r.sessionToken) {
-      localStorage.setItem(SESSION_KEY, r.sessionToken);
+      storage.setItem(SESSION_KEY, r.sessionToken);
       state.adminName = name || "admin";
       showAdminPanel();
     } else toast(r.message || "รหัสผ่านไม่ถูกต้อง", "error");
@@ -695,7 +779,7 @@ async function loginAdmin() {
   finally { btn.textContent = orig; btn.disabled = false; }
 }
 async function loadAdminOrders(page) {
-  const session = localStorage.getItem(SESSION_KEY);
+  const session = storage.getItem(SESSION_KEY);
   if (!session) { showAdminLogin(); return; }
   state.adminPage = page || 1;
   $("adminOrderList").innerHTML = "<p style='text-align:center;color:#888;'>กำลังโหลด...</p>";
@@ -708,7 +792,7 @@ async function loadAdminOrders(page) {
       renderAdminOrders(); renderPagination();
       if ($("adminTabDashboard").style.display === "block") renderDashboard();
     } else if (r.code === "UNAUTHORIZED") {
-      localStorage.removeItem(SESSION_KEY); showAdminLogin(); toast("Session หมดอายุ", "error");
+      storage.removeItem(SESSION_KEY); showAdminLogin(); toast("Session หมดอายุ", "error");
     } else $("adminOrderList").innerHTML = "<p style='text-align:center;color:#dc3545;'>โหลดไม่สำเร็จ: " + escapeHTML(r.message || "") + "</p>";
   } catch (e) { $("adminOrderList").innerHTML = "<p style='text-align:center;color:#dc3545;'>เชื่อมต่อไม่ได้: " + escapeHTML(e.message) + "</p>"; }
   resetAdminIdle();
@@ -784,6 +868,8 @@ function renderAdminOrders() {
     const item = document.createElement("div");
     item.style.cssText = "background:var(--bg-input);border:1px solid var(--border-color);border-radius:8px;padding:12px;display:flex;gap:12px;";
     
+    const encodedSlipLink = encodeURIComponent(o.slipLink || "");
+
     item.innerHTML = `${img}<div style="flex:1;font-size:13px;color:var(--text-main);">
       <div style="font-weight:600;color:var(--brand-red);font-size:14px;margin-bottom:2px;">รหัส: ${escapeHTML(o.orderId || 'N/A')}</div>
       <div style="font-weight:600;">${escapeHTML(o.name || '—')} <span style="color:var(--text-muted);font-weight:400;">(${escapeHTML(o.classRoom || '-')})</span>${o.price ? ` <span style="color:var(--brand-red);font-weight:700;">฿${Number(o.price).toLocaleString("th-TH")}</span>` : ""}</div>
@@ -799,7 +885,7 @@ function renderAdminOrders() {
       <div style="display:flex;flex-direction:column;gap:4px;justify-content:center;">
         
         ${canV ? `
-          <button style="background:#17a2b8;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;" onclick="verifyPayment(${o.rowIndex}, '${escapeHTML(o.orderId)}', '${escapeHTML(o.slipLink)}')">ยืนยันเงิน</button>
+          <button style="background:#17a2b8;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;" onclick="verifyPayment(${o.rowIndex}, '${escapeHTML(o.orderId)}', '${encodedSlipLink}')">ยืนยันเงิน</button>
           <button style="background:#dc3545;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;" onclick="rejectPayment(${o.rowIndex}, '${escapeHTML(o.orderId)}')">สลิปไม่ผ่าน</button>
         ` : ""}
         
@@ -812,11 +898,12 @@ function renderAdminOrders() {
     list.appendChild(item);
   });
 }
-async function verifyPayment(rowIndex, orderId, slipLink) {
-  const session = localStorage.getItem(SESSION_KEY);
+async function verifyPayment(rowIndex, orderId, encodedSlipLink) {
+  const session = storage.getItem(SESSION_KEY);
   if (!session) { toast("Session หมดอายุ", "error"); showAdminLogin(); return; }
   
-  // 🆕 ส่ง slipLink เข้าไปโชว์ใน Modal ด้วย
+  const slipLink = decodeURIComponent(encodedSlipLink || "");
+
   const isConfirmed = await showCustomModal("ยืนยันการรับเงิน", `ยืนยันว่าเงินของออเดอร์ <b>${orderId}</b> เข้าบัญชีแล้วใช่มั้ย`, true, "warning", slipLink);
   if (!isConfirmed) return;
   
@@ -827,10 +914,9 @@ async function verifyPayment(rowIndex, orderId, slipLink) {
   } catch (e) { toast("เชื่อมต่อล้มเหลว", "error"); }
 }
 async function rejectPayment(rowIndex, orderId) {
-  const session = localStorage.getItem(SESSION_KEY);
+  const session = storage.getItem(SESSION_KEY);
   if (!session) { toast("Session หมดอายุ", "error"); showAdminLogin(); return; }
   
-  // ใช้ prompt เดิมเพื่อรับเหตุผล
   const reason = prompt("เหตุผลที่สลิปไม่ผ่าน (เช่น ยอดไม่ตรง, สลิปซ้ำ):", "");
   if (reason === null) return;
   
@@ -841,10 +927,9 @@ async function rejectPayment(rowIndex, orderId) {
   } catch (e) { toast("เชื่อมต่อล้มเหลว", "error"); }
 }
 async function updateStatus(rowIndex, newStatus, customerName) {
-  const session = localStorage.getItem(SESSION_KEY);
+  const session = storage.getItem(SESSION_KEY);
   if (!session) { toast("Session หมดอายุ", "error"); showAdminLogin(); return; }
   
-  // 🆕 ใช้ Custom Modal แทน confirm
   const isConfirmed = await showCustomModal("เปลี่ยนสถานะ", `ต้องการเปลี่ยนสถานะเป็น <b>"${newStatus}"</b> ใช่มั้ย`, true, "warning");
   if (!isConfirmed) return;
   
@@ -852,7 +937,7 @@ async function updateStatus(rowIndex, newStatus, customerName) {
   try {
     const r = await (await fetchWithRetry(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "update_status", sessionToken: session, rowIndex, newStatus, customerName, adminName: state.adminName || "admin" }), headers: { "Content-Type": "text/plain;charset=utf-8" } }, { retries: 1, ms: 30000 })).json();
     if (r.status === "error") {
-      if (r.code === "UNAUTHORIZED") { localStorage.removeItem(SESSION_KEY); toast("Session หมดอายุ", "error"); showAdminLogin(); }
+      if (r.code === "UNAUTHORIZED") { storage.removeItem(SESSION_KEY); toast("Session หมดอายุ", "error"); showAdminLogin(); }
       else toast(r.message, "error");
       return;
     }
@@ -862,9 +947,8 @@ async function updateStatus(rowIndex, newStatus, customerName) {
   } catch (e) { toast("การเชื่อมต่อล้มเหลว: " + e.message, "error"); }
 }
 
-// 🆕 ใช้ Custom Modal แทน alert ในฟังก์ชันนี้
 async function generateManualOtp() {
-  const session = localStorage.getItem(SESSION_KEY);
+  const session = storage.getItem(SESSION_KEY);
   if (!session) return toast("Session หมดอายุ", "error");
 
   const orderId = prompt("กรุณากรอกรหัสออเดอร์ (เช่น CS69-1234):");
@@ -892,12 +976,12 @@ function exportCSV() {
   URL.revokeObjectURL(url); toast("ดาวน์โหลด CSV แล้ว", "success");
 }
 async function generateStatsLink() {
-  const session = localStorage.getItem(SESSION_KEY);
+  const session = storage.getItem(SESSION_KEY);
   if (!session) { toast("Session หมดอายุ", "error"); return; }
   try {
     const r = await (await fetchWithRetry(`${GOOGLE_SCRIPT_URL}?action=generate_stats_token&token=${encodeURIComponent(session)}`, {}, { retries: 1, ms: 15000 })).json();
     if (r.status !== "success" || !r.token) { toast("สร้างลิงก์ไม่สำเร็จ: " + (r.message || ""), "error"); return; }
-    const url = window.location.origin + window.location.pathname + "?stats=" + encodeURIComponent(r.token);
+    const url = buildShareUrl("?stats=" + encodeURIComponent(r.token));
     await copyToClipboard(url, "คัดลอกลิงก์ (สำหรับแชร์ให้ครูได้)");
   } catch (e) { toast("การเชื่อมต่อล้มเหลว: " + e.message, "error"); }
 }
@@ -954,3 +1038,9 @@ function updateCountdowns() {
 }
 setInterval(updateCountdowns, 1000); updateCountdowns();
 updateSummary(); checkFormValid();
+
+// แจ้งเตือนถ้ายังไม่ได้ตั้งค่า backend
+if (!BACKEND_READY) {
+  console.warn("[Chiangsaen] ยังไม่ได้ตั้งค่า googleScriptUrl ใน config.js — จะบันทึกออเดอร์ไม่ได้");
+  setTimeout(() => toast("ยังไม่ได้ตั้งค่า config.js (googleScriptUrl)", "error"), 800);
+}
