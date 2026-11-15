@@ -94,11 +94,12 @@ function handleCustomModalOk() {
   }
 }
 
-const PRICE_RULES = { surcharge: { "2XL": 10 } };
+// 🆕 อัปเดตราคาให้รองรับ 2XL, 3XL ฯลฯ
+const PRICE_RULES = { surcharge: { "2XL": 10, "3XL": 10, "4XL": 10, "5XL": 10 } };
 function computePrice(basePrice, size, allow2XL) {
   const base = +basePrice || 0;
   let extra = PRICE_RULES.surcharge[size] || 0;
-  if (allow2XL === false && size === "2XL") extra = 0;
+  if (allow2XL === false && ["2XL", "3XL", "4XL", "5XL"].includes(size)) extra = 0;
   return { base, extra, total: base + extra };
 }
 
@@ -205,7 +206,8 @@ function restoreDraft() {
   $("customerPin").value = d.customerPin || ""; $("classRoom").value = d.classRoom || "";
   if (d.style) {
     state.style = d.style;
-    if (d.style === "เสื้อสี" || d.style === "เสื้อฟุตบอล") state.basePrice = 289;
+    // 🆕 เช็กสินค้าใหม่
+    if (["เสื้อสี", "เสื้อฟุตบอล", "เสื้อประตูมัธยมศึกษาตอนต้น", "เสื้อประตูมัธยมศึกษาตอนปลาย"].includes(d.style)) state.basePrice = 289;
     else if (d.style === "กางเกงฟุตบอล") state.basePrice = 149;
     else state.basePrice = 279;
     state.allow2XL = d.style !== "กางเกงฟุตบอล";
@@ -253,8 +255,6 @@ const SlipValidator = {
   }
 };
 
-// โหลด Tesseract.js แบบ lazy เฉพาะตอนอัปโหลดสลิป
-// (เดิมโหลดแบบ blocking ใน <head> ทำให้หน้าแรกช้าถ้า CDN ตอบช้า/ล่ม)
 let tesseractLoaderPromise = null;
 function loadTesseract() {
   if (window.Tesseract) return Promise.resolve(window.Tesseract);
@@ -368,9 +368,16 @@ function selectProductFromModal() {
   if (!selectedProductFromModal) return;
   closeModal("productModal");
   state.style = selectedProductFromModal;
-  if (selectedProductFromModal === "เสื้อสี" || selectedProductFromModal === "เสื้อฟุตบอล") { state.basePrice = 289; state.allow2XL = true; }
-  else if (selectedProductFromModal === "กางเกงฟุตบอล") { state.basePrice = 149; state.allow2XL = false; }
-  else { state.basePrice = 279; state.allow2XL = true; }
+  // 🆕 อัปเดตราคาให้ตรงกับสินค้าใหม่
+  if (["เสื้อสี", "เสื้อฟุตบอล", "เสื้อประตูมัธยมศึกษาตอนต้น", "เสื้อประตูมัธยมศึกษาตอนปลาย"].includes(selectedProductFromModal)) { 
+    state.basePrice = 289; state.allow2XL = true; 
+  }
+  else if (selectedProductFromModal === "กางเกงฟุตบอล") { 
+    state.basePrice = 149; state.allow2XL = false; 
+  }
+  else { 
+    state.basePrice = 279; state.allow2XL = true; 
+  }
   const calc = computePrice(state.basePrice, state.size, state.allow2XL);
   state.surcharge = calc.extra; state.price = calc.total;
   updateSummary(); checkFormValid(); saveDraft();
@@ -514,7 +521,6 @@ function buildShareUrl(search) {
   if (base) {
     url = new URL(base, window.location.href);
   } else {
-    // ตัด index.html ออกเพื่อให้ลิงก์สวยและไม่ชนกับ cleanUrls ของ Vercel
     const path = window.location.pathname.replace(/index\.html?$/i, "") || "/";
     url = new URL(path, window.location.origin);
   }

@@ -3,32 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chiangsaen Team · Class of 69</title>
-<meta name="description" content="สั่งซื้อเสื้อคณะเชียงแสน Class of 69 — เลือกแบบเสื้อ ไซส์ สกรีนชื่อ-เบอร์ อัปโหลดสลิปชำระเงิน และติดตามสถานะคำสั่งซื้อออนไลน์ได้ตลอด 24 ชั่วโมง">
-<meta name="format-detection" content="telephone=no">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Chiangsaen Team">
-<meta property="og:title" content="Chiangsaen Team · Class of 69">
-<meta property="og:description" content="สั่งซื้อเสื้อคณะเชียงแสน Class of 69 — เลือกแบบเสื้อ ไซส์ สกรีนชื่อ-เบอร์ และติดตามสถานะออเดอร์ออนไลน์">
-<meta property="og:image" content="https://i.ibb.co/jPk5L1kQ/logo-jpg.jpg">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Chiangsaen Team · Class of 69">
-<meta name="twitter:description" content="สั่งซื้อเสื้อคณะเชียงแสน Class of 69 และติดตามสถานะออเดอร์ออนไลน์">
-<meta name="twitter:image" content="https://i.ibb.co/jPk5L1kQ/logo-jpg.jpg">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="favicon.svg">
+<title>Chiangsaen Team</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Sarabun:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<!-- Script โหลด Tesseract แบบ Lazy Load ใน script.js แทน -->
 </head>
 <body class="dark-mode">
-
-<noscript>
-  <div style="background:#d32f2f;color:#fff;padding:14px 18px;text-align:center;font-family:sans-serif;font-size:14px;">
-    หน้านี้ต้องเปิดใช้งาน JavaScript เพื่อสั่งซื้อและติดตามสถานะคำสั่งซื้อ กรุณาเปิด JavaScript แล้วโหลดหน้าใหม่
-  </div>
-</noscript>
 
 <div class="side-menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
 <div class="side-menu" id="sideMenu">
@@ -61,46 +43,77 @@
     <div class="card">
       <h2><span class="num">1</span> รูปแบบเสื้อ</h2>
       <div class="styles" id="stylePicker" style="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px;">
+        
+        <!-- 1. เสื้อสี -->
         <div class="product-card">
-          <img src="https://i.postimg.cc/63CMqn9f/IMG-4743.png" alt="เสื้อสี" onerror="this.src='assets/placeholder.svg'" onclick="zoomImage(this.src)">
+          <img src="https://i.postimg.cc/63CMqn9f/IMG-4743.png" alt="เสื้อสี" onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'" onclick="zoomImage(this.src)">
           <div class="product-card-info" onclick="openProductModal('เสื้อสี', 289, 'https://i.postimg.cc/63CMqn9f/IMG-4743.png', 'เสื้อสีพื้น เนื้อผ้าเบา ระบายอากาศได้ดี', true)">
             <div class="product-card-title">เสื้อสี</div>
             <div class="product-card-price">289 THB</div>
             <div class="btn-buy">ดูรายละเอียด</div>
           </div>
         </div>
+
+        <!-- 2. เสื้อวอลเลย์บอล -->
         <div class="product-card">
-          <img src="" alt="เสื้อวอลเลย์บอล" onerror="this.src='assets/placeholder.svg'" onclick="zoomImage(this.src)">
-          <div class="product-card-info" onclick="openProductModal('เสื้อวอลเลย์บอล', 279, 'assets/placeholder.svg', 'เสื้อวอลเลย์บอล เนื้อผ้ายืดหยุ่น ระบายเหงื่อได้ดี', true)">
+          <img src="https://via.placeholder.com/300x300?text=No+Image" alt="เสื้อวอลเลย์บอล" onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('เสื้อวอลเลย์บอล', 279, 'https://via.placeholder.com/300x300?text=No+Image', 'เสื้อวอลเลย์บอล เนื้อผ้ายืดหยุ่น ระบายเหงื่อได้ดี', true)">
             <div class="product-card-title">เสื้อวอลเลย์บอล</div>
             <div class="product-card-price">279 THB</div>
             <div class="btn-buy">ดูรายละเอียด</div>
           </div>
         </div>
+
+        <!-- 3. เสื้อบาสเกตบอล -->
         <div class="product-card">
-          <img src="assets/placeholder.svg" alt="เสื้อบาส" onerror="this.src='assets/placeholder.svg'" onclick="zoomImage(this.src)">
-          <div class="product-card-info" onclick="openProductModal('เสื้อบาสเกตบอล', 279, 'assets/placeholder.svg', 'เสื้อบาสเกตบอล ทรงหลวม ใส่สบาย เนื้อผ้าโปร่ง', true)">
+          <img src="https://via.placeholder.com/300x300?text=No+Image" alt="เสื้อบาส" onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('เสื้อบาสเกตบอล', 279, 'https://via.placeholder.com/300x300?text=No+Image', 'เสื้อบาสเกตบอล ทรงหลวม ใส่สบาย เนื้อผ้าโปร่ง', true)">
             <div class="product-card-title">เสื้อบาสเกตบอล</div>
             <div class="product-card-price">279 THB</div>
             <div class="btn-buy">ดูรายละเอียด</div>
           </div>
         </div>
+
+        <!-- 4. เสื้อฟุตบอล -->
         <div class="product-card">
-          <img src="assets/placeholder.svg" alt="เสื้อฟุตบอล" onerror="this.src='assets/placeholder.svg'" onclick="zoomImage(this.src)">
-          <div class="product-card-info" onclick="openProductModal('เสื้อฟุตบอล', 289, 'assets/placeholder.svg', 'เสื้อฟุตบอล เนื้อผ้าเบา ระบายอากาศได้ดี', true)">
+          <img src="https://via.placeholder.com/300x300?text=No+Image" alt="เสื้อฟุตบอล" onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('เสื้อฟุตบอล', 289, 'https://via.placeholder.com/300x300?text=No+Image', 'เสื้อฟุตบอล เนื้อผ้าเบา ระบายอากาศได้ดี', true)">
             <div class="product-card-title">เสื้อฟุตบอล</div>
             <div class="product-card-price">289 THB</div>
             <div class="btn-buy">ดูรายละเอียด</div>
           </div>
         </div>
+
+        <!-- 5. กางเกงฟุตบอล -->
         <div class="product-card">
-          <img src="assets/placeholder.svg" alt="กางเกงฟุตบอล" onerror="this.src='assets/placeholder.svg'" onclick="zoomImage(this.src)">
-          <div class="product-card-info" onclick="openProductModal('กางเกงฟุตบอล', 149, 'assets/placeholder.svg', 'กางเกงฟุตบอล ทรงสปอร์ต เนื้อผ้าเบา', false)">
+          <img src="https://via.placeholder.com/300x300?text=No+Image" alt="กางเกงฟุตบอล" onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('กางเกงฟุตบอล', 149, 'https://via.placeholder.com/300x300?text=No+Image', 'กางเกงฟุตบอล ทรงสปอร์ต เนื้อผ้าเบา', false)">
             <div class="product-card-title">กางเกงฟุตบอล</div>
             <div class="product-card-price">149 THB</div>
             <div class="btn-buy">ดูรายละเอียด</div>
           </div>
         </div>
+
+        <!-- 🆕 6. เสื้อประตูมัธยมศึกษาตอนต้น -->
+        <div class="product-card">
+          <img src="https://via.placeholder.com/300x300?text=No+Image" alt="เสื้อประตู ม.ต้น" onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('เสื้อประตูมัธยมศึกษาตอนต้น', 289, 'https://via.placeholder.com/300x300?text=No+Image', 'เสื้อประตู ระดับชั้นมัธยมศึกษาตอนต้น', true)">
+            <div class="product-card-title">เสื้อประตู ม.ต้น</div>
+            <div class="product-card-price">289 THB</div>
+            <div class="btn-buy">ดูรายละเอียด</div>
+          </div>
+        </div>
+
+        <!-- 🆕 7. เสื้อประตูมัธยมศึกษาตอนปลาย -->
+        <div class="product-card">
+          <img src="https://via.placeholder.com/300x300?text=No+Image" alt="เสื้อประตู ม.ปลาย" onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('เสื้อประตูมัธยมศึกษาตอนปลาย', 289, 'https://via.placeholder.com/300x300?text=No+Image', 'เสื้อประตู ระดับชั้นมัธยมศึกษาตอนปลาย', true)">
+            <div class="product-card-title">เสื้อประตู ม.ปลาย</div>
+            <div class="product-card-price">289 THB</div>
+            <div class="btn-buy">ดูรายละเอียด</div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -280,6 +293,7 @@
   </div>
 </div>
 
+<!-- Admin Modal -->
 <div class="modal-overlay" id="adminModal" style="align-items:flex-start;overflow-y:auto;">
   <div class="modal-content" style="max-width:700px;margin-top:20px;">
     <h3 style="color:var(--brand-red);">Admin Panel</h3>
@@ -398,7 +412,6 @@
   </div>
 </div>
 
-<!-- ค่าตั้งต้นของระบบ (backend URL / โดเมน / ธีม) แยกไฟล์เพื่อแก้ไขได้โดยไม่ต้องแตะโค้ดหลัก -->
 <script src="config.js"></script>
 <script src="script.js"></script>
 </body>
