@@ -1,0 +1,13 @@
+# Vercel
+.vercel
+.env*
+.env*.local
+
+# OS / editor
+Thumbs.db
+.DS_Store
+*.bak
+*.log
+
+# future build step
+node_modules/

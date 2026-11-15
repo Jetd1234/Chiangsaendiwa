@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# หน้าติดตามสถานะ/สรุปยอดใช้ query string (?order=, ?stats=) ไม่ต้องให้ search engine เก็บ
+Disallow: /*?*
+
+# ไม่มี sitemap เพราะเป็นหน้าเดียวและโดเมนเปลี่ยนได้

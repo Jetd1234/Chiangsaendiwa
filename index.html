@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chiangsaen Team · Class of 69</title>
+<meta name="description" content="สั่งซื้อเสื้อคณะเชียงแสน Class of 69 — เลือกแบบเสื้อ ไซส์ สกรีนชื่อ-เบอร์ อัปโหลดสลิปชำระเงิน และติดตามสถานะคำสั่งซื้อออนไลน์ได้ตลอด 24 ชั่วโมง">
+<meta name="format-detection" content="telephone=no">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Chiangsaen Team">
+<meta property="og:title" content="Chiangsaen Team · Class of 69">
+<meta property="og:description" content="สั่งซื้อเสื้อคณะเชียงแสน Class of 69 — เลือกแบบเสื้อ ไซส์ สกรีนชื่อ-เบอร์ และติดตามสถานะออเดอร์ออนไลน์">
+<meta property="og:image" content="https://i.ibb.co/jPk5L1kQ/logo-jpg.jpg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Chiangsaen Team · Class of 69">
+<meta name="twitter:description" content="สั่งซื้อเสื้อคณะเชียงแสน Class of 69 และติดตามสถานะออเดอร์ออนไลน์">
+<meta name="twitter:image" content="https://i.ibb.co/jPk5L1kQ/logo-jpg.jpg">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Sarabun:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-mode">
+
+<noscript>
+  <div style="background:#d32f2f;color:#fff;padding:14px 18px;text-align:center;font-family:sans-serif;font-size:14px;">
+    หน้านี้ต้องเปิดใช้งาน JavaScript เพื่อสั่งซื้อและติดตามสถานะคำสั่งซื้อ กรุณาเปิด JavaScript แล้วโหลดหน้าใหม่
+  </div>
+</noscript>
+
+<div class="side-menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+<div class="side-menu" id="sideMenu">
+  <div class="side-menu-header"><h3>เมนู</h3><button class="close-menu" onclick="toggleMenu()">&times;</button></div>
+  <ul class="menu-list">
+    <li><a onclick="toggleTheme()"><div style="display:flex;align-items:center;gap:12px;"><svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg><span id="themeText">Light Mode</span></div><label class="switch" onclick="event.stopPropagation();"><input type="checkbox" id="themeSwitch" onchange="toggleTheme()"><span class="slider"></span></label></a></li>
+    <li><a onclick="toggleMenu(); openPublicList()"><div style="display:flex;align-items:center;gap:12px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>รายชื่อที่สั่งแล้ว</div></a></li>
+    <li><a href="https://line.me/ti/p/qx4pTpyFEH" target="_blank" rel="noopener"><div style="display:flex;align-items:center;gap:12px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>ช่องทางการติดต่อผู้พัฒนา</div></a></li>
+  </ul>
+</div>
+
+<div class="wrap">
+  <div id="screen-form">
+    <div class="draft-banner" id="draftBanner">
+      <span>พบข้อมูลที่กรอกค้างไว้ ต้องการกู้คืนมั้ยครับ</span>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button onclick="restoreDraft()">กู้คืน</button>
+        <button class="dismiss" onclick="dismissDraft()">ลบ</button>
+      </div>
+    </div>
+
+    <div class="brandbar">
+      <button class="menu-btn" onclick="toggleMenu()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
+      <button class="btn-track" onclick="openTrackModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>ติดตามสถานะ</button>
+      <div class="logo" id="logoSlot"><img src="https://i.ibb.co/jPk5L1kQ/logo-jpg.jpg" alt="โลโก้เชียงแสน"></div>
+      <h1>Chiangsaen Team</h1>
+      <p>Class of 69</p>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">1</span> รูปแบบเสื้อ</h2>
+      <div class="styles" id="stylePicker" style="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px;">
+        <div class="product-card">
+          <img src="https://i.postimg.cc/63CMqn9f/IMG-4743.png" alt="เสื้อสี" onerror="this.src='assets/placeholder.svg'" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('เสื้อสี', 289, 'https://i.postimg.cc/63CMqn9f/IMG-4743.png', 'เสื้อสีพื้น เนื้อผ้าเบา ระบายอากาศได้ดี', true)">
+            <div class="product-card-title">เสื้อสี</div>
+            <div class="product-card-price">289 THB</div>
+            <div class="btn-buy">ดูรายละเอียด</div>
+          </div>
+        </div>
+        <div class="product-card">
+          <img src="assets/placeholder.svg" alt="เสื้อวอลเลย์บอล" onerror="this.src='assets/placeholder.svg'" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('เสื้อวอลเลย์บอล', 279, 'assets/placeholder.svg', 'เสื้อวอลเลย์บอล เนื้อผ้ายืดหยุ่น ระบายเหงื่อได้ดี', true)">
+            <div class="product-card-title">เสื้อวอลเลย์บอล</div>
+            <div class="product-card-price">279 THB</div>
+            <div class="btn-buy">ดูรายละเอียด</div>
+          </div>
+        </div>
+        <div class="product-card">
+          <img src="assets/placeholder.svg" alt="เสื้อบาส" onerror="this.src='assets/placeholder.svg'" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('เสื้อบาสเกตบอล', 279, 'assets/placeholder.svg', 'เสื้อบาสเกตบอล ทรงหลวม ใส่สบาย เนื้อผ้าโปร่ง', true)">
+            <div class="product-card-title">เสื้อบาสเกตบอล</div>
+            <div class="product-card-price">279 THB</div>
+            <div class="btn-buy">ดูรายละเอียด</div>
+          </div>
+        </div>
+        <div class="product-card">
+          <img src="assets/placeholder.svg" alt="เสื้อฟุตบอล" onerror="this.src='assets/placeholder.svg'" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('เสื้อฟุตบอล', 289, 'assets/placeholder.svg', 'เสื้อฟุตบอล เนื้อผ้าเบา ระบายอากาศได้ดี', true)">
+            <div class="product-card-title">เสื้อฟุตบอล</div>
+            <div class="product-card-price">289 THB</div>
+            <div class="btn-buy">ดูรายละเอียด</div>
+          </div>
+        </div>
+        <div class="product-card">
+          <img src="assets/placeholder.svg" alt="กางเกงฟุตบอล" onerror="this.src='assets/placeholder.svg'" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('กางเกงฟุตบอล', 149, 'assets/placeholder.svg', 'กางเกงฟุตบอล ทรงสปอร์ต เนื้อผ้าเบา', false)">
+            <div class="product-card-title">กางเกงฟุตบอล</div>
+            <div class="product-card-price">149 THB</div>
+            <div class="btn-buy">ดูรายละเอียด</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">2</span> รายละเอียดสกรีน</h2>
+      <label for="backName">ชื่อสกรีนหลังเสื้อ</label>
+      <input id="backName" maxlength="20" placeholder="พิมพ์ชื่อของคุณ..." autocomplete="off">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:16px;">
+        <label for="backNumber" style="margin:0;">เบอร์หลังเสื้อ (ถ้ามี)</label>
+        <button class="btn-lucky" onclick="randomLuckyNumber()">สุ่มเลขมงคล</button>
+      </div>
+      <input id="backNumber" maxlength="3" inputmode="numeric" placeholder="เช่น 07, 99" autocomplete="off" oninput="this.value=this.value.replace(/\D/g,'').slice(0,3); updateNumberPreview()" style="margin-top:8px;">
+      <div class="number-preview-box" id="numberPreviewBox" style="display:none;"><div class="number-preview-text" id="numberPreviewText">00</div></div>
+
+      <div class="size-header"><label>ขนาดเสื้อ (Size)</label><button class="btn-guide" onclick="openSizeGuide()">ดูตารางเทียบ</button></div>
+      <div class="sizes" id="sizePicker">
+        <button type="button" class="size-btn" data-size="S">S</button>
+        <button type="button" class="size-btn active" data-size="M">M</button>
+        <button type="button" class="size-btn" data-size="L">L</button>
+        <button type="button" class="size-btn" data-size="XL">XL</button>
+        <button type="button" class="size-btn surcharge" data-size="2XL">2XL</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">3</span> ข้อมูลผู้สั่ง &amp; ห้องเรียน</h2>
+      <div class="row"><div><label for="firstName">ชื่อ</label><input id="firstName" placeholder="ชื่อ" autocomplete="given-name"></div><div><label for="lastName">นามสกุล</label><input id="lastName" placeholder="นามสกุล" autocomplete="family-name"></div></div>
+      <label for="customerEmail">อีเมล (สำหรับรับแจ้งเตือนสถานะ + OTP ติดตาม)</label>
+      <input id="customerEmail" type="email" placeholder="example@email.com" autocomplete="email">
+      <label for="phone">เบอร์โทรศัพท์</label>
+      <input id="phone" inputmode="tel" placeholder="08xxxxxxxx" autocomplete="tel" oninput="checkPhoneLive()">
+      <div id="phoneWarning" style="display:none; color:#dc3545; font-size:13px; margin-top:8px; font-weight:bold; background:rgba(220,53,69,0.1); padding:10px; border-radius:8px; border:1px solid #dc3545;"></div>
+      
+      <!-- 🆕 เพิ่มช่องกรอก PIN -->
+      <label for="customerPin">ตั้งรหัส PIN 4 หลัก (สำหรับติดตามสถานะกรณีฉุกเฉิน)</label>
+      <input id="customerPin" type="text" inputmode="numeric" maxlength="4" placeholder="เช่น 1234" autocomplete="off" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)">
+      
+      <label for="classRoom">เลือกห้องเรียน</label>
+      <select id="classRoom">
+        <option value="">-- เลือกห้องเรียน --</option>
+        <optgroup label="มัธยมศึกษาตอนต้น">
+          <option value="ม.1/5">ม.1/5</option><option value="ม.1/6">ม.1/6</option><option value="ม.1/15">ม.1/15</option><option value="ม.1/16">ม.1/16</option>
+          <option value="ม.2/4">ม.2/4</option><option value="ม.2/9">ม.2/9</option><option value="ม.2/10">ม.2/10</option>
+          <option value="ม.3/3">ม.3/3</option><option value="ม.3/13">ม.3/13</option><option value="ม.3/14">ม.3/14</option>
+        </optgroup>
+        <optgroup label="มัธยมศึกษาตอนปลาย">
+          <option value="ม.4/3">ม.4/3</option><option value="ม.4/7">ม.4/7</option><option value="ม.4/8">ม.4/8</option>
+          <option value="ม.5/1">ม.5/1</option><option value="ม.5/6">ม.5/6</option><option value="ม.5/7">ม.5/7</option><option value="ม.5/16">ม.5/16</option>
+          <option value="ม.6/3">ม.6/3</option><option value="ม.6/10">ม.6/10</option><option value="ม.6/11">ม.6/11</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">4</span> สรุปคำสั่งซื้อ</h2>
+      <div class="summary">
+        <div class="rowline"><span>รูปแบบ</span><span id="sumStyle">เสื้อสี</span></div>
+        <div class="rowline"><span>ไซส์</span><span id="sumSize">M</span></div>
+        <div class="rowline"><span>ชื่อสกรีน</span><span id="sumBack">—</span></div>
+        <div class="rowline"><span>เบอร์หลัง</span><span id="sumNumber">—</span></div>
+        <div class="rowline"><span>ห้องเรียน</span><span id="sumClass">—</span></div>
+        <div class="rowline total"><span>ยอดชำระ</span><span id="sumTotal">฿289</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">5</span> ชำระเงิน</h2>
+      <div class="pay-panel active" id="payPanelBank">
+        <div class="qr-box">
+          <div class="amount" id="payAmountBank">฿289</div>
+          <div class="qrcode-wrap"><img src="https://i.postimg.cc/vZ4ZN1Jx/504428EA-93A3-42BB-9D2A-A77FFF80C997.jpg" alt="QR ธนาคารกสิกร"></div>
+          <p>สแกนจ่ายผ่านธนาคาร กสิกรไทย<br>บัญชี: น.ส.สุจิตตา อุทัยมา<br>เลขบัญชี: 169-1-44534-4</p>
+        </div>
+      </div>
+      <div style="margin-top:24px;">
+        <label>แนบสลิปการโอนเงิน (บังคับ)</label>
+        <label class="slip-drop" id="slipDrop">
+          <input type="file" id="slipInput" accept="image/*" onchange="handleSlipUpload(event)">
+          <div id="slipText">แตะเพื่ออัปโหลดสลิป</div>
+          <img id="slipPreview" alt="slip preview">
+        </label>
+        <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
+      </div>
+      <div class="ai-scanner" id="aiScannerBox" style="display:none;">
+        <div style="font-size:13px;font-weight:600;color:var(--brand-red);">AI กำลังอ่านข้อมูลจากสลิป...</div>
+        <div class="ai-status" id="aiStatusText">กรุณารอสักครู่...</div>
+      </div>
+      <label class="ai-toggle"><input type="checkbox" id="aiToggle" checked> เปิด AI อ่านสลิปอัตโนมัติ (ปิดได้ถ้าเครื่องช้า)</label>
+      <button class="btn btn-primary" id="submitBtn" disabled style="margin-top:24px;">ยืนยันการสั่งซื้อ</button>
+      <div style="text-align:center;font-size:13px;color:var(--text-muted);margin-top:12px;" id="errorMsg"></div>
+    </div>
+
+    <div style="text-align:center;color:var(--text-muted);font-size:12px;margin-top:40px;padding-bottom:60px;">
+      พัฒนาโดย <strong>J9</strong> และ <strong>D</strong>
+    </div>
+  </div>
+
+  <div id="screen-history" style="display:none;">
+    <div class="card" style="margin-top:20px;">
+      <h2 style="justify-content:space-between;border-bottom:1px solid var(--border-color);padding-bottom:16px;margin-bottom:16px;">
+        <span><span class="num">i</span> รายละเอียดคำสั่งซื้อ</span>
+        <button onclick="goBackFromHistory()" style="background:var(--bg-input);border:1px solid var(--border-color);color:var(--text-main);padding:6px 12px;border-radius:6px;font-size:13px;cursor:pointer;">ย้อนกลับ</button>
+      </h2>
+      <div id="historyPageContent"></div>
+    </div>
+  </div>
+
+  <div id="screen-success" style="display:none;">
+    <div class="success-box" style="text-align:center;padding:40px 20px;background:var(--bg-card);border-radius:12px;border:1px solid var(--border-color);">
+      <h2 style="font-size:26px;margin:0 0 12px;color:#28a745;font-weight:600;">Order Confirmed</h2>
+      <p style="color:var(--text-muted);font-size:15px;margin:0 0 20px;">ระบบได้รับข้อมูลและสลิปของคุณแล้ว<br>กรุณารอแอดมินตรวจสอบและยืนยันการชำระเงิน</p>
+      <canvas id="ticketCanvas" width="600" height="800" style="width:100%;max-width:320px;border-radius:8px;margin:0 auto 20px;display:block;box-shadow:var(--shadow);"></canvas>
+      <a id="downloadTicket" style="background:var(--bg-input);color:var(--text-main);text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600;display:inline-block;margin-top:10px;font-family:'Kanit',sans-serif;border:1px solid var(--border-color);" download="chiangsaen_ticket.png">เซฟตั๋ว</a>
+      <div class="share-row" id="shareRow" style="display:none;">
+        <button class="share-btn" onclick="shareTicket()">Share Ticket</button>
+        <button class="share-btn" onclick="copyOrderId()">คัดลอกรหัส</button>
+      </div>
+      <button style="background:var(--brand-red);color:#fff;border:none;padding:16px 24px;border-radius:8px;font-weight:600;font-family:'Kanit',sans-serif;cursor:pointer;margin-top:16px;width:100%;display:block;font-size:16px;" onclick="goBackHome()">กลับสู่หน้าหลัก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tracking Modal (OTP + PIN) -->
+<div class="modal-overlay" id="trackModal">
+  <div class="modal-content">
+    <h3>ติดตามสถานะ</h3>
+    <div id="trackStage1">
+      <p style="font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:16px;">กรอก "รหัสออเดอร์" + "เบอร์โทร" เพื่อรับ OTP</p>
+      <input type="text" id="trackPhone" placeholder="CS69-XXXX" autocomplete="off" style="margin-bottom:10px;">
+      <input type="text" id="trackPhoneConfirm" placeholder="เบอร์โทรที่ใช้สั่งซื้อ" inputmode="tel" autocomplete="off" style="margin-bottom:10px;">
+      <button class="btn btn-primary" onclick="requestTrackOtp()" id="trackBtn">ขอ OTP ทางอีเมล</button>
+      
+      <!-- 🆕 ส่วนตรวจสอบด้วย PIN สำรอง -->
+      <div style="margin-top:20px; border-top:1px dashed var(--border-color); padding-top:16px;">
+        <p style="font-size:12px; color:#888; margin-bottom:8px;">กรณีไม่ได้รับอีเมล OTP ให้ใช้ PIN ที่ตั้งไว้:</p>
+        <input type="text" id="trackPinInput" placeholder="กรอก PIN 4 หลัก" inputmode="numeric" maxlength="4" style="text-align:center;letter-spacing:4px;margin-bottom:8px;">
+        <button class="btn" onclick="verifyTrackPin()" id="trackPinBtn" style="background:var(--bg-input);color:var(--text-main);border:1px solid var(--border-color);">ตรวจสอบด้วย PIN</button>
+      </div>
+    </div>
+    
+    <div id="trackStage2" style="display:none;">
+      <p style="font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:16px;">กรอกรหัส OTP 6 หลักที่ส่งไปอีเมลของคำสั่งซื้อ</p>
+      <input type="text" id="otpInput" placeholder="______" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
+      <button class="btn btn-primary" onclick="verifyTrackOtp()" id="otpVerifyBtn" style="margin-top:12px;">ยืนยัน OTP</button>
+      <button type="button" onclick="requestTrackOtp()" id="resendOtpBtn" disabled style="background:transparent;border:none;color:var(--text-muted);width:100%;margin-top:12px;cursor:pointer;text-decoration:underline;font-family:inherit;font-size:13px;">ส่ง OTP ซ้ำ (<span id="resendCountdown">60</span>s)</button>
+    </div>
+    
+    <div id="trackResult" class="status-result" style="text-align:left;"></div>
+    <button style="background:transparent;border:none;color:var(--text-muted);width:100%;margin-top:16px;cursor:pointer;text-decoration:underline;" onclick="closeModal('trackModal')">ปิดหน้าต่าง</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="sizeModal">
+  <div class="modal-content">
+    <h3>ตารางเทียบไซส์</h3>
+    <p style="font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:12px;">*ขนาดอาจคลาดเคลื่อนเล็กน้อย</p>
+    <table class="size-table">
+      <tr><th>ไซส์</th><th>รอบอก (นิ้ว)</th><th>ความยาว (นิ้ว)</th></tr>
+      <tr><td>S</td><td>36</td><td>26</td></tr>
+      <tr><td>M</td><td>38</td><td>27</td></tr>
+      <tr><td>L</td><td>40</td><td>28</td></tr>
+      <tr><td>XL</td><td>42</td><td>29</td></tr>
+      <tr class="surcharge-row"><td>2XL</td><td>44</td><td>30</td></tr>
+    </table>
+    <p style="font-size:12px;color:var(--brand-red);text-align:center;margin-top:12px;font-weight:600;">ไซส์2XL + 10 บาท</p>
+    <button style="background:transparent;border:none;color:var(--text-muted);width:100%;margin-top:16px;cursor:pointer;text-decoration:underline;" onclick="closeModal('sizeModal')">ปิดหน้าต่าง</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="publicListModal">
+  <div class="modal-content">
+    <h3>รายชื่อที่สั่งแล้ว</h3>
+    <p style="font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:12px;">แสดงเฉพาะชื่อ-นามสกุล (ปิดบังบางส่วน) และห้องเรียน</p>
+    <input type="text" id="publicSearch" placeholder="ค้นหาชื่อหรือห้อง..." oninput="filterPublicList()" style="margin-bottom:12px;">
+    <div class="public-list" id="publicListContent" style="background:var(--bg-input);border-radius:8px;padding:12px;border:1px solid var(--border-color);"><p style="text-align:center;color:#888;">กำลังโหลด...</p></div>
+    <button style="background:transparent;border:none;color:var(--text-muted);width:100%;margin-top:16px;cursor:pointer;text-decoration:underline;" onclick="closeModal('publicListModal')">ปิดหน้าต่าง</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="adminModal" style="align-items:flex-start;overflow-y:auto;">
+  <div class="modal-content" style="max-width:700px;margin-top:20px;">
+    <h3 style="color:var(--brand-red);">Admin Panel</h3>
+    <div id="adminLoginBox">
+      <p style="font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:16px;">กรอกรหัสผ่านเพื่อจัดการออเดอร์</p>
+      <input type="text" id="adminName" placeholder="ชื่อผู้ดูแล (ไม่บังคับ)" style="text-align:center;margin-bottom:12px;">
+      <input type="password" id="adminPass" placeholder="รหัสผ่าน" style="text-align:center;">
+      <button class="btn btn-primary" style="margin-top:16px;" onclick="loginAdmin()" id="loginBtn">เข้าสู่ระบบ</button>
+      <button style="background:transparent;border:none;color:var(--text-muted);width:100%;margin-top:16px;cursor:pointer;text-decoration:underline;" onclick="closeModal('adminModal')">ปิดหน้าต่าง</button>
+    </div>
+    
+    <div id="adminOrderBox" style="display:none;">
+      <div class="admin-toolbar">
+        <button onclick="loadAdminOrders(state.adminPage)">รีเฟรช</button>
+        <button onclick="switchAdminTab('orders')" id="tabBtnOrders" style="background:var(--brand-red);color:#fff;border:none;">ออเดอร์</button>
+        <button onclick="switchAdminTab('dashboard')" id="tabBtnDash">Dashboard</button>
+        <button onclick="exportCSV()">Export CSV</button>
+        <button onclick="generateStatsLink()">ลิงก์สรุปให้ครู</button>
+        
+        <!-- 🆕 ปุ่ม OTP ฉุกเฉินสำหรับแอดมิน -->
+        <button onclick="generateManualOtp()" style="background:#dc3545;color:#fff;border:none;">🆘 ออก OTP ฉุกเฉิน</button>
+        
+        <button onclick="logoutAdmin()" style="margin-left:auto;background:transparent;border:none;color:var(--text-muted);">ออก</button>
+        <button onclick="closeModal('adminModal')" style="background:transparent;border:none;">ปิด</button>
+      </div>
+
+      <div id="adminTabOrders">
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+          <select id="adminStatusFilterSelect" onchange="state.adminStatusFilter=this.value; loadAdminOrders(1);" style="flex:1;min-width:140px;">
+            <option value="">— ทุกสถานะ —</option>
+            <option value="รอตรวจสอบสลิป">รอตรวจสอบสลิป</option>
+            <option value="ยืนยันเงินแล้ว">ยืนยันเงินแล้ว</option>
+            <option value="กำลังผลิต">กำลังผลิต</option>
+            <option value="จัดส่งแล้ว">จัดส่งแล้ว</option>
+            <option value="สลิปไม่ผ่าน">สลิปไม่ผ่าน</option>
+            <option value="ยกเลิก">ยกเลิก</option>
+          </select>
+        </div>
+        <input type="text" id="adminFilter" class="admin-filter" placeholder="กรอง: ชื่อ / รหัส / ห้อง / สถานะ / เบอร์โทร / อีเมล / ชื่อสกรีน / เบอร์เสื้อ" oninput="filterAdminOrders()">
+        <div id="adminOrderList" style="display:flex;flex-direction:column;gap:10px;"></div>
+        <div id="adminPagination"></div>
+      </div>
+
+      <div id="adminTabDashboard" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+          <div style="background:var(--bg-input);padding:16px;border-radius:8px;border:1px solid var(--border-color);text-align:center;">
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:4px;">ออเดอร์ทั้งหมด</div>
+            <div style="font-size:28px;font-weight:700;" id="dashTotalOrders">—</div>
+          </div>
+          <div style="background:var(--bg-input);padding:16px;border-radius:8px;border:1px solid var(--border-color);text-align:center;">
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:4px;">ยอดเงินที่ได้รับ</div>
+            <div style="font-size:28px;font-weight:700;color:#28a745;" id="dashTotalRevenue">—</div>
+          </div>
+        </div>
+        <div style="background:var(--bg-input);border:1px solid var(--brand-red);border-radius:8px;padding:16px;margin-bottom:20px;">
+          <div style="font-size:14px;font-weight:700;color:var(--brand-red);margin-bottom:12px;text-align:center;">สรุปกระเป๋าเงิน</div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--border-color);">
+            <span style="color:var(--text-muted);">คาดว่าจะได้รับ:</span><strong id="dashExpectedRevenue">—</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--border-color);">
+            <span style="color:var(--text-muted);">ได้รับจริงแล้ว:</span><strong id="dashReceivedRevenue" style="color:#198754;">—</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;margin-top:4px;">
+            <span style="color:var(--text-muted);">ค้างตรวจ:</span><strong id="dashPendingRevenue" style="color:#dc3545;">—</strong>
+          </div>
+        </div>
+        <h4 style="font-size:15px;margin:0 0 10px;">สรุปตามสถานะ</h4>
+        <div id="dashStatusList" style="margin-bottom:20px;"></div>
+        <h4 style="font-size:15px;margin:0 0 10px;">สรุปตามไซส์</h4>
+        <div id="dashSizeList" style="margin-bottom:20px;"></div>
+        <h4 style="font-size:15px;margin:0 0 10px;">สรุปตามห้องเรียน (Top 5)</h4>
+        <div id="dashClassList" style="margin-bottom:20px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="productModal">
+  <div class="modal-content" style="max-width:400px;padding:0;overflow:hidden;background:var(--bg-card);">
+    <div style="position:relative;">
+      <img id="modalProductImg" src="" alt="Product" style="width:100%;height:200px;object-fit:cover;display:block;cursor:pointer;border-radius:12px 12px 0 0;" onclick="zoomImage(this.src)">
+      <button onclick="closeModal('productModal')" style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.5);color:#fff;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;">&times;</button>
+    </div>
+    <div style="padding:24px;">
+      <h3 id="modalProductTitle" style="font-size:22px;margin-bottom:8px;color:var(--text-main);text-align:left;">ชื่อสินค้า</h3>
+      <div id="modalProductPrice" style="font-size:24px;color:var(--brand-red);font-weight:700;margin-bottom:16px;">289 THB</div>
+      <p id="modalProductDesc" style="color:var(--text-muted);font-size:14px;margin-bottom:24px;line-height:1.6;">รายละเอียดสินค้า...</p>
+      <button class="btn btn-primary" onclick="selectProductFromModal()">เลือกแบบเสื้อนี้</button>
+    </div>
+  </div>
+</div>
+
+<div id="imageLightbox" onclick="closeLightbox()">
+  <button class="close-lb">&times;</button>
+  <img id="lightboxImg" src="" alt="Zoomed Image">
+</div>
+
+<div class="bottom-timer-bar">
+  <div class="timer-item"><span class="timer-label">พรีออเดอร์</span><span class="timer-value" id="cdPresale">-- วัน --:--:--</span></div>
+  <div class="timer-divider"></div>
+  <div class="timer-item"><span class="timer-label">กีฬาสี</span><span class="timer-value sports" id="cdSports">-- วัน --:--:--</span></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 🆕 Custom Modal สำหรับแจ้งเตือนและยืนยัน (สวยงาม) -->
+<div class="modal-overlay" id="customModal" style="z-index: 9999;">
+  <div class="modal-content" style="text-align: center; padding: 30px 20px;">
+    <div id="customModalIcon" style="margin-bottom: 16px; display: flex; justify-content: center;"></div>
+    <h3 id="customModalTitle" style="margin-bottom: 12px; font-size: 22px;">หัวข้อ</h3>
+    <p id="customModalText" style="color: var(--text-muted); font-size: 15px; margin-bottom: 24px; line-height: 1.6;"></p>
+    <div style="display: flex; gap: 10px; justify-content: center;">
+      <button id="customModalCancelBtn" onclick="closeCustomModal()" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); font-weight: 600; cursor: pointer; display: none;">ยกเลิก</button>
+      <button id="customModalOkBtn" onclick="handleCustomModalOk()" style="flex: 1; padding: 12px; border-radius: 8px; border: none; background: var(--brand-red); color: #fff; font-weight: 600; cursor: pointer;">ตกลง</button>
+    </div>
+  </div>
+</div>
+
+<!-- ค่าตั้งต้นของระบบ (backend URL / โดเมน / ธีม) แยกไฟล์เพื่อแก้ไขได้โดยไม่ต้องแตะโค้ดหลัก -->
+<script src="config.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

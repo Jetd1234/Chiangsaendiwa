@@ -1,0 +1,15 @@
+# ไฟล์/โฟลเดอร์ที่ไม่ต้องอัปโหลดขึ้น Vercel
+.vercel
+.git
+.gitignore
+.vercelignore
+.env
+.env*
+README.md
+*.md
+*.zip
+*.bak
+.backup-pre-vercel
+node_modules
+Thumbs.db
+.DS_Store
