@@ -417,6 +417,10 @@ function selectProductFromModal() {
   if (!selectedProductFromModal) return;
   closeModal("productModal");
   state.style = selectedProductFromModal;
+  
+  // 🔴 แสดงช่องชื่อสกรีนกลับมาเมื่อเลือกเสื้อ
+  $("backNameGroup").style.display = "block";
+
   if (["เสื้อสี", "เสื้อฟุตบอล", "เสื้อฟุตบอลม.ต้น", "เสื้อประตูมัธยมศึกษาตอนต้น", "เสื้อประตูมัธยมศึกษาตอนปลาย"].includes(selectedProductFromModal)) { 
     state.basePrice = 289; state.allow2XL = true; 
   }
@@ -463,14 +467,14 @@ function selectPants(name, price) {
   // ซ่อนหน้าเลือกแบบก่อน แล้วโชว์หน้าพรีวิว
   closeModal("pantsModal"); 
   $("pantsPreviewModal").style.display = "flex";
-
-  // ผูก Event ให้ปุ่มยืนยัน
-  $("confirmPantsBtn").onclick = function() {
     closeModal("pantsPreviewModal");
     state.style = tempPantsSelection.name;
     state.basePrice = tempPantsSelection.price;
-    state.allow2XL = false; // กางเกงไม่รับ 2XL
+    state.allow2XL = false; 
     
+    // 🔴 ซ่อนช่องชื่อสกรีนเมื่อเลือกกางเกง
+    $("backNameGroup").style.display = "none";
+
     const calc = computePrice(state.basePrice, state.size, state.allow2XL);
     state.surcharge = calc.extra; 
     state.price = calc.total;
@@ -479,10 +483,9 @@ function selectPants(name, price) {
     checkFormValid(); 
     saveDraft();
     
-    window.scrollTo({ top: $("colorButtons") ? $("colorButtons").offsetTop - 150 : 0, behavior: 'smooth' });
+    window.scrollTo({ top: $("colorButtons").offsetTop - 150, behavior: 'smooth' });
     toast("เลือกแบบ " + state.style + " แล้ว", "success");
   };
-}
 
 function zoomImage(src) { $("lightboxImg").src = src; $("imageLightbox").style.display = "flex"; }
 function closeLightbox() { $("imageLightbox").style.display = "none"; $("lightboxImg").src = ""; }
@@ -606,7 +609,7 @@ function updateSummary() {
   $("sumClassNumber").textContent = state.selectedClassNumber || "—";
   
   const el = $("sumTotal");
-  if (state.surcharge > 0) el.innerHTML = `${formatTHB(state.price)} <small>(ฐาน ${formatTHB(state.basePrice)} + ไซส์ ${state.size} ${formatTHB(state.surcharge)})</small>`;
+  if (state.surcharge > 0) el.innerHTML = `${formatTHB(state.price)} <small>(ฐาน ${formatTHB(state.basePrice)} + ไซซ์ ${state.size} ${formatTHB(state.surcharge)})</small>`;
   else el.textContent = formatTHB(state.price);
   if ($("payAmountBank")) $("payAmountBank").textContent = formatTHB(state.price);
 }
@@ -616,7 +619,10 @@ function updateSummary() {
 
 function checkFormValid() {
   let ok = true, missing = [];
-  if (!$("backName").value.trim()) { ok = false; missing.push("ชื่อสกรีน"); }
+  // 🔴 เช็กชื่อสกรีนแค่ตอนที่สินค้าไม่ใช่กางเกง
+  if (!state.style.startsWith("กางเกง") && !$("backName").value.trim()) { ok = false; missing.push("ชื่อสกรีน"); }
+  
+  // ... (โค้ดที่เหลือเหมือนเดิม)
   if (!$("firstName").value.trim()) { ok = false; missing.push("ชื่อ"); }
   if (!$("lastName").value.trim()) { ok = false; missing.push("นามสกุล"); }
   if (!$("customerEmail").value.includes("@")) { ok = false; missing.push("อีเมล"); }
@@ -755,6 +761,7 @@ function resetForm() {
   state.selectedClassRoom = "";
   state.selectedClassNumber = "";
   state.selectedTeamCategory = "";
+   $("backNameGroup").style.display = "block";
   
   $("selectedTeamDisplay").style.display = "none";
   $("selectedTeamText").textContent = "";
@@ -907,7 +914,7 @@ async function showOrderDetail(id) {
     <section class="tracking-detail-card">
       <h3>รายละเอียดคำสั่งซื้อ</h3>
       <div class="tracking-detail-row"><span>รูปแบบเสื้อ</span><strong>${escapeHTML(o.style || "—")}</strong></div>
-      <div class="tracking-detail-row"><span>ไซส์</span><strong>${escapeHTML(o.size || "—")}</strong></div>
+      <div class="tracking-detail-row"><span>ไซซ์</span><strong>${escapeHTML(o.size || "—")}</strong></div>
       <div class="tracking-detail-row"><span>ชื่อสกรีน</span><strong>${escapeHTML(o.backName || "—")}</strong></div>
       <div class="tracking-detail-row"><span>เบอร์หลังเสื้อ</span><strong>${escapeHTML(o.backNumber || "—")}</strong></div>
       ${priceLine}
@@ -1053,7 +1060,7 @@ function renderDashboard() {
   const sz = {};
   orders.forEach(o => { sz[o.size || "—"] = (sz[o.size || "—"] || 0) + 1; });
   const order = { "SS":1, "S":2, "M":3, "L":4, "XL":5, "2XL":6, "3XL":7, "4XL":8, "5XL":9, "6XL":10 };
-  $("dashSizeList").innerHTML = Object.keys(sz).sort((a,b) => (order[a]||99) - (order[b]||99)).map(s => `<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg-input);border-radius:6px;font-size:13px;margin-bottom:6px;"><span>ไซส์ ${escapeHTML(s)}</span><span style="font-weight:600;">${sz[s]} ตัว</span></div>`).join("") || "<p style='color:#888;font-size:13px;'>ไม่มีข้อมูล</p>";
+  $("dashSizeList").innerHTML = Object.keys(sz).sort((a,b) => (order[a]||99) - (order[b]||99)).map(s => `<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg-input);border-radius:6px;font-size:13px;margin-bottom:6px;"><span>ไซซ์ ${escapeHTML(s)}</span><span style="font-weight:600;">${sz[s]} ตัว</span></div>`).join("") || "<p style='color:#888;font-size:13px;'>ไม่มีข้อมูล</p>";
 
   const cl = {};
   orders.forEach(o => { cl[o.classRoom || "—"] = (cl[o.classRoom || "—"] || 0) + 1; });
@@ -1100,7 +1107,7 @@ function renderAdminOrders() {
       <div style="font-weight:600;">${escapeHTML(o.name || '—')} <span style="color:var(--text-muted);font-weight:400;">(${escapeHTML(o.classRoom || '-')})</span>${o.price ? ` <span style="color:var(--brand-red);font-weight:700;">฿${Number(o.price).toLocaleString("th-TH")}</span>` : ""}</div>
       <div style="color:var(--text-muted);">โทร: ${escapeHTML(o.phone || '-')}</div>
       <div style="color:var(--text-muted);font-size:12px;">อีเมล: ${escapeHTML(o.email || '—')}</div>
-      <div style="margin-top:4px;">เสื้อ: ${escapeHTML(o.style || '-')} / ไซส์ ${escapeHTML(o.size || '-')} / สกรีน: ${escapeHTML(o.backName || '-')} (${escapeHTML(o.backNumber || '-')})</div>
+      <div style="margin-top:4px;">เสื้อ: ${escapeHTML(o.style || '-')} / ไซซ์ ${escapeHTML(o.size || '-')} / สกรีน: ${escapeHTML(o.backName || '-')} (${escapeHTML(o.backNumber || '-')})</div>
       <div style="margin-top:6px;font-weight:600;color:${sc};">สถานะ: ${escapeHTML(o.status)}</div>
       <div style="margin-top:6px;padding:8px;border-radius:6px;background:var(--bg-card);font-size:12px;">
         <div style="font-weight:700;margin-bottom:3px;">ผลตรวจสลิป (OCR)</div>
@@ -1190,7 +1197,7 @@ async function generateManualOtp() {
 }
 function exportCSV() {
   if (!state.adminOrders.length) { toast("ไม่มีข้อมูล", "error"); return; }
-  const headers = ["Order ID","วันที่","ชื่อ","ห้อง","โทร","อีเมล","รูปแบบ","ไซส์","ชื่อสกรีน","เบอร์","ราคา","สถานะ","ผลตรวจสลิป","สลิป"];
+  const headers = ["Order ID","วันที่","ชื่อ","ห้อง","โทร","อีเมล","รูปแบบ","ไซซ์","ชื่อสกรีน","เบอร์","ราคา","สถานะ","ผลตรวจสลิป","สลิป"];
   const rows = state.adminOrders.map(o => [o.orderId||"",o.date?new Date(o.date).toLocaleString("th-TH"):"",o.name||"",o.classRoom||"",o.phone||"",o.email||"",o.style||"",o.size||"",o.backName||"",o.backNumber||"",o.price||"",o.status||"",o.slipReview||"",o.slipLink||""]);
   const csv = "\uFEFF" + [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
@@ -1243,7 +1250,7 @@ async function loadPublicStats(token) {
     if (r.status !== "success" || !r.data) throw new Error("โหลดไม่สำเร็จ");
     const s = r.data;
     const statusRows = Object.keys(s.byStatus).map(k => `<div style="display:flex;justify-content:space-between;padding:6px 0;"><span>${escapeHTML(k)}</span><span style="font-weight:600;">${s.byStatus[k]}</span></div>`).join("");
-    const sizeRows = Object.keys(s.bySize).map(k => `<div style="display:flex;justify-content:space-between;padding:6px 0;"><span>ไซส์ ${escapeHTML(k)}</span><span style="font-weight:600;">${s.bySize[k]} ตัว</span></div>`).join("");
+    const sizeRows = Object.keys(s.bySize).map(k => `<div style="display:flex;justify-content:space-between;padding:6px 0;"><span>ไซซ์ ${escapeHTML(k)}</span><span style="font-weight:600;">${s.bySize[k]} ตัว</span></div>`).join("");
     const classRows = Object.keys(s.byClass).sort((a,b) => s.byClass[b]-s.byClass[a]).slice(0,5).map(k => `<div style="display:flex;justify-content:space-between;padding:6px 0;"><span>${escapeHTML(k)}</span><span style="font-weight:600;">${s.byClass[k]} คน</span></div>`).join("");
     $("publicStatsBody").innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;"><div style="background:var(--bg-input);padding:12px;border-radius:8px;text-align:center;"><div style="font-size:12px;color:var(--text-muted);">ออเดอร์</div><div style="font-size:24px;font-weight:700;">${s.total}</div></div><div style="background:var(--bg-input);padding:12px;border-radius:8px;text-align:center;"><div style="font-size:12px;color:var(--text-muted);">ยอดเงิน</div><div style="font-size:24px;font-weight:700;color:#28a745;">${formatTHB(s.revenue)}</div></div></div><h4 style="font-size:14px;margin:12px 0 6px;">ตามสถานะ</h4>${statusRows}<h4 style="font-size:14px;margin:12px 0 6px;">ตามไซส์</h4>${sizeRows}<h4 style="font-size:14px;margin:12px 0 6px;">Top 5 ห้องเรียน</h4>${classRows}`;
   } catch (e) { $("publicStatsBody").innerHTML = "<p style='text-align:center;color:#dc3545;'>ลิงก์หมดอายุหรือไม่ถูกต้อง</p>"; }
