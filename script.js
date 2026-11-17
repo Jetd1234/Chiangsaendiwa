@@ -91,7 +91,6 @@ function handleCustomModalOk() {
 }
 
 // ─────────────── STATE & PRICING ───────────────
-// 🔴 แก้ไขจุดนี้: ให้ทุกไซส์ 2XL - 6XL บวกเพิ่ม 10 บาทเท่ากันหมด
 const PRICE_RULES = { 
   surcharge: { 
     "2XL": 10, 
@@ -111,7 +110,12 @@ function computePrice(basePrice, size, allow2XL) {
 
 const state = {
   style: "เสื้อสี", price: 289, basePrice: 289, surcharge: 0, size: "M", allow2XL: true,
-  selectedTeamColor: "", // เก็บชื่อคณะสี
+  
+  selectedTeamColor: "",
+  selectedClassRoom: "",
+  selectedClassNumber: "",
+  selectedTeamCategory: "", // 'chiangsaen' หรือ 'other'
+
   slipFile: null, slipFilename: "", slipOCR: "", slipRef: "", slipAmount: null,
   slipAmountMatched: false, slipOCRDone: false,
   idempotencyKey: null, submitLocked: false,
@@ -203,7 +207,14 @@ function saveDraft() {
     customerEmail: $("customerEmail").value, phone: $("phone").value,
     customerPin: $("customerPin").value, 
     teamColor: state.selectedTeamColor,
-    classRoom: $("classRoom").value, classNumber: $("classNumber").value, 
+    teamCategory: state.selectedTeamCategory,
+    classRoom: state.selectedClassRoom,
+    classNumber: state.selectedClassNumber,
+    otherRoom: $("otherRoom") ? $("otherRoom").value : "",
+    otherClassNumber: $("otherClassNumber") ? $("otherClassNumber").value : "",
+    csRoomLow: $("csRoomLow") ? $("csRoomLow").value : "",
+    csRoomHigh: $("csRoomHigh") ? $("csRoomHigh").value : "",
+    csClassNumber: $("csClassNumber") ? $("csClassNumber").value : "",
     style: state.style, size: state.size
   })); } catch (e) {}
 }
@@ -215,17 +226,28 @@ function restoreDraft() {
   $("firstName").value = d.firstName || ""; $("lastName").value = d.lastName || "";
   $("customerEmail").value = d.customerEmail || ""; $("phone").value = d.phone || "";
   $("customerPin").value = d.customerPin || "";
-  $("classRoom").value = d.classRoom || "";
-  $("classNumber").value = d.classNumber || "";
   
+  if ($("otherRoom")) $("otherRoom").value = d.otherRoom || "";
+  if ($("otherClassNumber")) $("otherClassNumber").value = d.otherClassNumber || "";
+  if ($("csRoomLow")) $("csRoomLow").value = d.csRoomLow || "";
+  if ($("csRoomHigh")) $("csRoomHigh").value = d.csRoomHigh || "";
+  if ($("csClassNumber")) $("csClassNumber").value = d.csClassNumber || "";
+
   state.selectedTeamColor = d.teamColor || "";
-  document.querySelectorAll("#colorButtons .color-btn").forEach(btn => {
-    const btnText = btn.textContent.trim().split(" ")[0]; // ดึงชื่อคณะก่อนเจอวงเล็บ
+  state.selectedTeamCategory = d.teamCategory || "";
+  state.selectedClassRoom = d.classRoom || "";
+  state.selectedClassNumber = d.classNumber || "";
+
+  if (state.selectedTeamCategory) {
+    updateTeamDisplay(state.selectedTeamCategory === 'chiangsaen' ? `คณะเชียงแสน (แดง) - ${state.selectedClassRoom} เลขที่ ${state.selectedClassNumber}` : `คณะ${state.selectedTeamColor} - ${state.selectedClassRoom} เลขที่ ${state.selectedClassNumber}`);
+  }
+
+  document.querySelectorAll("#otherColorButtons .color-btn").forEach(btn => {
+    const btnText = btn.textContent.trim().split(" ")[0];
     const selected = btnText === state.selectedTeamColor;
     btn.classList.toggle("active", selected);
-    btn.style.background = selected ? "var(--brand-red)" : "var(--bg-input)";
-    btn.style.color = selected ? "#fff" : "var(--text-main)";
-    btn.style.borderColor = selected ? "var(--brand-red)" : "var(--border-color)";
+    if(selected) { btn.style.background = "var(--brand-red)"; btn.style.color = "#fff"; btn.style.borderColor = "var(--brand-red)"; }
+    else { btn.style.background = "var(--bg-input)"; btn.style.color = "var(--text-main)"; btn.style.borderColor = "var(--border-color)"; }
   });
   
   if (d.style) {
@@ -407,21 +429,59 @@ function selectProductFromModal() {
   const calc = computePrice(state.basePrice, state.size, state.allow2XL);
   state.surcharge = calc.extra; state.price = calc.total;
   updateSummary(); checkFormValid(); saveDraft();
-  window.scrollTo({ top: $("colorButtons").offsetTop - 150, behavior: 'smooth' });
+  window.scrollTo({ top: $("colorButtons") ? $("colorButtons").offsetTop - 150 : 0, behavior: 'smooth' });
   toast("เลือกแบบ " + selectedProductFromModal + " แล้ว", "success");
 }
 
+// 🆕 ระบบกางเกง (พรีวิวรูปก่อนยืนยัน)
+let tempPantsSelection = { name: "", price: 0 };
 function openPantsModal() { $("pantsModal").style.display = "flex"; }
+
 function selectPants(name, price) {
-  closeModal("pantsModal");
-  state.style = name;
-  state.basePrice = price;
-  state.allow2XL = false; 
-  const calc = computePrice(state.basePrice, state.size, state.allow2XL);
-  state.surcharge = calc.extra; state.price = calc.total;
-  updateSummary(); checkFormValid(); saveDraft();
-  window.scrollTo({ top: $("colorButtons").offsetTop - 150, behavior: 'smooth' });
-  toast("เลือกแบบ " + name + " แล้ว", "success");
+  tempPantsSelection = { name, price };
+  
+  // 🔴 ตั้งค่ารูปภาพแยกตามแบบที่เลือก
+  let imgUrl = "https://i.ibb.co/4Rgd4LFF/CS3.jpg"; 
+  
+  if (name === "กางเกงฟุตบอล ม.ต้น") {
+    imgUrl = "https://i.ibb.co/b5Cs2rxq/CS1.jpg"; // เปลี่ยนลิงก์รูป ม.ต้น
+  } 
+  else if (name === "กางเกงฟุตบอล ม.ต้น (ผู้รักษาประตู)") {
+    imgUrl = "https://i.ibb.co/N62pHKcZ/CS1-1.jpg"; // เปลี่ยนลิงก์รูป ม.ต้น (GK)
+  } 
+  else if (name === "กางเกงฟุตบอล ม.ปลาย") {
+    imgUrl = "https://i.ibb.co/TxV7xH2z/CS2.jpg"; // เปลี่ยนลิงก์รูป ม.ปลาย
+  } 
+  else if (name === "กางเกงฟุตบอล ม.ปลาย (ผู้รักษาประตู)") {
+    imgUrl = "https://i.ibb.co/8LZ5v9my/CS2-1.jpg"; // เปลี่ยนลิงก์รูป ม.ปลาย (GK)
+  }
+
+  $("pantsPreviewImg").src = imgUrl;
+  $("pantsPreviewTitle").textContent = name;
+  $("pantsPreviewPrice").textContent = price + " THB";
+  
+  // ซ่อนหน้าเลือกแบบก่อน แล้วโชว์หน้าพรีวิว
+  closeModal("pantsModal"); 
+  $("pantsPreviewModal").style.display = "flex";
+
+  // ผูก Event ให้ปุ่มยืนยัน
+  $("confirmPantsBtn").onclick = function() {
+    closeModal("pantsPreviewModal");
+    state.style = tempPantsSelection.name;
+    state.basePrice = tempPantsSelection.price;
+    state.allow2XL = false; // กางเกงไม่รับ 2XL
+    
+    const calc = computePrice(state.basePrice, state.size, state.allow2XL);
+    state.surcharge = calc.extra; 
+    state.price = calc.total;
+    
+    updateSummary(); 
+    checkFormValid(); 
+    saveDraft();
+    
+    window.scrollTo({ top: $("colorButtons") ? $("colorButtons").offsetTop - 150 : 0, behavior: 'smooth' });
+    toast("เลือกแบบ " + state.style + " แล้ว", "success");
+  };
 }
 
 function zoomImage(src) { $("lightboxImg").src = src; $("imageLightbox").style.display = "flex"; }
@@ -437,9 +497,93 @@ document.querySelectorAll("#sizePicker .size-btn").forEach(btn => {
     if (state.slipFile && $("aiToggle").checked) await analyzeSlip(state.slipFile);
   });
 });
+
+// ─────────────── ระบบคณะสี (2 Dropdown) ───────────────
+
+function toggleTeamCategory(category) {
+  const isCs = category === 'chiangsaen';
+  const btnCs = $("btnChiangsaen");
+  const panelCs = $("panelChiangsaen");
+  const btnOthers = $("btnOthers");
+  const panelOthers = $("panelOthers");
+  
+  if (isCs) {
+    const isOpen = panelCs.style.display === "block";
+    panelCs.style.display = isOpen ? "none" : "block";
+    btnCs.classList.toggle("active", !isOpen);
+    
+    // ปิดอีกอัน
+    panelOthers.style.display = "none";
+    btnOthers.classList.remove("active");
+  } else {
+    const isOpen = panelOthers.style.display === "block";
+    panelOthers.style.display = isOpen ? "none" : "block";
+    btnOthers.classList.toggle("active", !isOpen);
+    
+    // ปิดอีกอัน
+    panelCs.style.display = "none";
+    btnCs.classList.remove("active");
+  }
+}
+
+// กดยืนยันคณะเชียงแสน
+function confirmChiangsaen() {
+  const roomLow = $("csRoomLow").value;
+  const roomHigh = $("csRoomHigh").value;
+  const classNum = $("csClassNumber").value.trim();
+
+  if (!roomLow && !roomHigh) { toast("กรุณาเลือกห้องเรียน (ม.ต้น หรือ ม.ปลาย)", "error"); return; }
+  if (!classNum) { toast("กรุณากรอกเลขที่", "error"); return; }
+
+  const finalRoom = roomLow ? roomLow : roomHigh;
+  
+  state.selectedTeamColor = "เชียงแสน";
+  state.selectedClassRoom = finalRoom;
+  state.selectedClassNumber = classNum;
+  state.selectedTeamCategory = "chiangsaen";
+
+  updateTeamDisplay(`คณะเชียงแสน (แดง) - ${finalRoom} เลขที่ ${classNum}`);
+  
+  // ปิด Accordion
+  $("panelChiangsaen").style.display = "none";
+  $("btnChiangsaen").classList.remove("active");
+
+  updateSummary(); checkFormValid(); saveDraft();
+}
+
+// กดยืนยันคณะอื่นๆ
+function confirmOtherTeam() {
+  const color = state.selectedTeamColor;
+  const room = $("otherRoom").value.trim();
+  const classNum = $("otherClassNumber").value.trim();
+
+  if (!color || color === "เชียงแสน") { toast("กรุณาเลือกคณะสีอื่นๆ ก่อน", "error"); return; }
+  if (!room) { toast("กรุณากรอกห้องเรียน", "error"); return; }
+  if (!classNum) { toast("กรุณากรอกเลขที่", "error"); return; }
+
+  state.selectedClassRoom = room;
+  state.selectedClassNumber = classNum;
+  state.selectedTeamCategory = "other";
+
+  updateTeamDisplay(`คณะ${color} - ${room} เลขที่ ${classNum}`);
+  
+  // ปิด Accordion
+  $("panelOthers").style.display = "none";
+  $("btnOthers").classList.remove("active");
+
+  updateSummary(); checkFormValid(); saveDraft();
+}
+
+function updateTeamDisplay(text) {
+  $("selectedTeamDisplay").style.display = "block";
+  $("selectedTeamText").textContent = text;
+}
+
+// เลือกสี (แค่ไฮไลท์ปุ่ม)
 function selectColor(colorName, btnElement) {
+  if (colorName === "เชียงแสน") return; // กันบั๊ก
   state.selectedTeamColor = colorName;
-  document.querySelectorAll("#colorButtons .color-btn").forEach(btn => {
+  document.querySelectorAll("#otherColorButtons .color-btn").forEach(btn => {
     const selected = btn === btnElement;
     btn.classList.toggle("active", selected);
     btn.style.background = selected ? "var(--brand-red)" : "var(--bg-input)";
@@ -454,17 +598,20 @@ function updateSummary() {
   $("sumSize").textContent = state.size;
   $("sumBack").textContent = $("backName").value.trim() || "—";
   $("sumNumber").textContent = $("backNumber").value.trim() || "—";
-  $("sumColor").textContent = state.selectedTeamColor || "—";
-  $("sumClass").textContent = $("classRoom").value.trim() || "—";
-  $("sumClassNumber").textContent = $("classNumber").value.trim() || "—";
+  
+  // แสดงคณะและห้อง
+  const colorText = state.selectedTeamCategory === 'chiangsaen' ? "เชียงแสน" : (state.selectedTeamColor || "—");
+  $("sumColor").textContent = colorText;
+  $("sumClass").textContent = state.selectedClassRoom || "—";
+  $("sumClassNumber").textContent = state.selectedClassNumber || "—";
   
   const el = $("sumTotal");
   if (state.surcharge > 0) el.innerHTML = `${formatTHB(state.price)} <small>(ฐาน ${formatTHB(state.basePrice)} + ไซส์ ${state.size} ${formatTHB(state.surcharge)})</small>`;
   else el.textContent = formatTHB(state.price);
   if ($("payAmountBank")) $("payAmountBank").textContent = formatTHB(state.price);
 }
-["backName","firstName","lastName","phone","customerEmail", "customerPin", "classRoom", "classNumber"].forEach(id => {
-  $(id).addEventListener("input", () => { updateSummary(); checkFormValid(); saveDraft(); });
+["backName","firstName","lastName","phone","customerEmail", "customerPin", "otherRoom", "otherClassNumber", "csClassNumber"].forEach(id => {
+  if($(id)) $(id).addEventListener("input", () => { updateSummary(); checkFormValid(); saveDraft(); });
 });
 
 function checkFormValid() {
@@ -474,9 +621,12 @@ function checkFormValid() {
   if (!$("lastName").value.trim()) { ok = false; missing.push("นามสกุล"); }
   if (!$("customerEmail").value.includes("@")) { ok = false; missing.push("อีเมล"); }
   if ($("phone").value.replace(/\D/g,"").length < 9) { ok = false; missing.push("เบอร์โทร"); }
-  if (!state.selectedTeamColor) { ok = false; missing.push("คณะสี"); }
-  if (!$("classRoom").value.trim()) { ok = false; missing.push("ห้องเรียน"); }
-  if (!$("classNumber").value.trim()) { ok = false; missing.push("เลขที่"); }
+  
+  // ตรวจสอบคณะสีและห้อง
+  if (!state.selectedTeamCategory) { ok = false; missing.push("คณะสีและห้องเรียน"); }
+  else if (!state.selectedClassRoom) { ok = false; missing.push("ห้องเรียน"); }
+  else if (!state.selectedClassNumber) { ok = false; missing.push("เลขที่"); }
+  
   if (!state.slipFile) { ok = false; missing.push("สลิปโอนเงิน"); }
   if ($("customerPin").value.replace(/\D/g,"").length !== 4) { ok = false; missing.push("PIN 4 หลัก"); }
   
@@ -502,12 +652,12 @@ $("submitBtn").addEventListener("click", async () => {
     if (!state.idempotencyKey) state.idempotencyKey = newIdempotencyKey();
     const slipBase64 = await fileToBase64_(state.slipFile);
     
-    const classRoomFull = $("classRoom").value.trim() + ($("classNumber").value.trim() ? " เลขที่ " + $("classNumber").value.trim() : "");
+    const classRoomFull = state.selectedClassRoom + " เลขที่ " + state.selectedClassNumber;
 
     const orderData = {
       idempotencyKey: state.idempotencyKey,
       fullName: $("firstName").value.trim() + " " + $("lastName").value.trim(),
-      teamColor: state.selectedTeamColor,
+      teamColor: state.selectedTeamCategory === 'chiangsaen' ? "เชียงแสน" : state.selectedTeamColor,
       classRoom: classRoomFull,
       phone: $("phone").value.trim(),
       customerPin: $("customerPin").value.trim(),
@@ -600,12 +750,22 @@ async function copyToClipboard(t, msg) {
 }
 function resetForm() {
   $("screen-history").style.display = "none";
-  ["backName","backNumber","firstName","lastName","phone","classRoom","classNumber","customerEmail","customerPin"].forEach(id => $(id).value = "");
+  ["backName","backNumber","firstName","lastName","phone","classRoom","classNumber","customerEmail","customerPin", "otherRoom", "otherClassNumber", "csRoomLow", "csRoomHigh", "csClassNumber"].forEach(id => { if($(id)) $(id).value = ""; });
   state.selectedTeamColor = "";
-  document.querySelectorAll("#colorButtons .color-btn").forEach(btn => {
+  state.selectedClassRoom = "";
+  state.selectedClassNumber = "";
+  state.selectedTeamCategory = "";
+  
+  $("selectedTeamDisplay").style.display = "none";
+  $("selectedTeamText").textContent = "";
+  
+  document.querySelectorAll("#otherColorButtons .color-btn").forEach(btn => {
     btn.classList.remove("active"); btn.style.background = "var(--bg-input)";
     btn.style.color = "var(--text-main)"; btn.style.borderColor = "var(--border-color)";
   });
+  $("panelChiangsaen").style.display = "none"; $("btnChiangsaen").classList.remove("active");
+  $("panelOthers").style.display = "none"; $("btnOthers").classList.remove("active");
+
   $("numberPreviewBox").style.display = "none"; $("aiScannerBox").style.display = "none";
   state.slipFile = null; state.slipFilename = ""; state.slipOCR = ""; state.slipRef = "";
   state.slipAmount = null; state.slipAmountMatched = false; state.slipOCRDone = false;

@@ -8,6 +8,27 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Sarabun:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<style>
+  /* สไตล์สำหรับระบบ Dropdown 2 หมวดหมู่ */
+  .team-category-box { margin-bottom: 16px; }
+  .team-btn-toggle {
+    width: 100%; padding: 16px; background: var(--bg-input); border: 1.5px solid var(--border-color);
+    color: var(--text-main); font-weight: 600; font-size: 15px; border-radius: 10px;
+    display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+    font-family: "Sarabun", sans-serif; transition: all 0.2s;
+  }
+  .team-btn-toggle:hover { border-color: var(--brand-red); color: var(--brand-red); }
+  .team-btn-toggle.active { border-color: var(--brand-red); background: rgba(211,47,47,0.05); }
+  .team-btn-toggle svg { transition: transform 0.3s; }
+  .team-btn-toggle.active svg { transform: rotate(180deg); }
+  
+  .team-panel {
+    display: none; padding: 20px; background: var(--bg-card); border: 1px solid var(--border-color);
+    border-top: none; border-radius: 0 0 10px 10px; margin-top: -4px;
+    animation: slideDown 0.3s ease;
+  }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 </head>
 <body class="dark-mode">
 
@@ -107,7 +128,7 @@
         </div>
 
         <div class="product-card">
-          <img src="https://placehold.co/300x300/1e1e1e/ffffff?text=Shorts" alt="กางเกง" onclick="zoomImage(this.src)">
+          <img src="https://i.ibb.co/4Rgd4LFF/CS3.jpg" alt="กางเกง" onclick="zoomImage(this.src)">
           <div class="product-card-info" onclick="openPantsModal()">
             <div class="product-card-title">กางเกง (4 แบบ)</div>
             <div class="product-card-price">149 THB</div>
@@ -155,24 +176,85 @@
       <label for="customerPin">ตั้งรหัส PIN 4 หลัก (สำหรับติดตามสถานะกรณีฉุกเฉิน)</label>
       <input id="customerPin" type="text" inputmode="numeric" maxlength="4" placeholder="เช่น 1234" autocomplete="off" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)">
       
-      <label>คณะสี</label>
-      <div id="colorButtons" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;">
-        <button type="button" class="color-btn" onclick="selectColor('เชียงแสน', this)" style="padding:12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);font-weight:600;cursor:pointer;transition:all .2s;">เชียงแสน (แดง)</button>
-        <button type="button" class="color-btn" onclick="selectColor('สุโขทัย', this)" style="padding:12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);font-weight:600;cursor:pointer;transition:all .2s;">สุโขทัย (ฟ้า)</button>
-        <button type="button" class="color-btn" onclick="selectColor('อยุธยา', this)" style="padding:12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);font-weight:600;cursor:pointer;transition:all .2s;">อยุธยา (ชมพู)</button>
-        <button type="button" class="color-btn" onclick="selectColor('อู่ทอง', this)" style="padding:12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);font-weight:600;cursor:pointer;transition:all .2s;">อู่ทอง (ม่วง)</button>
-        <button type="button" class="color-btn" onclick="selectColor('รัตนโกสินทร์', this)" style="padding:12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);font-weight:600;cursor:pointer;transition:all .2s;grid-column:1/-1;">รัตนโกสินทร์ (เขียว)</button>
+      <label style="margin-top:24px;">เลือกคณะสี</label>
+      
+      <!-- หมวดหมู่ 1: คณะเชียงแสน -->
+      <div class="team-category-box">
+        <button type="button" class="team-btn-toggle" id="btnChiangsaen" onclick="toggleTeamCategory('chiangsaen')">
+          <span>คณะเชียงแสน (แดง)</span>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div id="panelChiangsaen" class="team-panel">
+          <label>มัธยมศึกษาตอนต้น (เลือกห้อง)</label>
+          <select id="csRoomLow" style="margin-bottom:12px;">
+            <option value="">-- เลือกห้องเรียน --</option>
+            <option value="ม.1/5">ม.1/5</option>
+            <option value="ม.1/6">ม.1/6</option>
+            <option value="ม.1/15">ม.1/15</option>
+            <option value="ม.1/16">ม.1/16</option>
+            <option value="ม.2/4">ม.2/4</option>
+            <option value="ม.2/9">ม.2/9</option>
+            <option value="ม.2/10">ม.2/10</option>
+            <option value="ม.3/3">ม.3/3</option>
+            <option value="ม.3/13">ม.3/13</option>
+            <option value="ม.3/14">ม.3/14</option>
+          </select>
+
+          <label>มัธยมศึกษาตอนปลาย (เลือกห้อง)</label>
+          <select id="csRoomHigh" style="margin-bottom:12px;">
+            <option value="">-- เลือกห้องเรียน --</option>
+            <option value="ม.4/3">ม.4/3</option>
+            <option value="ม.4/7">ม.4/7</option>
+            <option value="ม.4/8">ม.4/8</option>
+            <option value="ม.5/1">ม.5/1</option>
+            <option value="ม.5/6">ม.5/6</option>
+            <option value="ม.5/7">ม.5/7</option>
+            <option value="ม.5/16">ม.5/16</option>
+            <option value="ม.6/3">ม.6/3</option>
+            <option value="ม.6/10">ม.6/10</option>
+            <option value="ม.6/11">ม.6/11</option>
+          </select>
+
+          <label>เลขที่</label>
+          <input id="csClassNumber" inputmode="numeric" placeholder="เช่น 12" style="margin-bottom:16px;">
+          
+          <button type="button" class="btn btn-primary" onclick="confirmChiangsaen()" style="padding:10px; font-size:14px;">ยืนยันคณะเชียงแสน</button>
+        </div>
       </div>
 
-      <div class="row">
-        <div>
-          <label for="classRoom">ห้องเรียน</label>
-          <input id="classRoom" placeholder="เช่น ม.5/1" autocomplete="off">
+      <!-- หมวดหมู่ 2: คณะอื่นๆ -->
+      <div class="team-category-box">
+        <button type="button" class="team-btn-toggle" id="btnOthers" onclick="toggleTeamCategory('others')">
+          <span>คณะอื่นๆ (สุโขทัย, อยุธยา, อู่ทอง, รัตนโกสินทร์)</span>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div id="panelOthers" class="team-panel">
+          <label>เลือกคณะสี</label>
+          <div id="otherColorButtons" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+            <button type="button" class="color-btn" onclick="selectColor('สุโขทัย', this)" style="padding:12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);font-weight:600;cursor:pointer;transition:all .2s;">สุโขทัย (ฟ้า)</button>
+            <button type="button" class="color-btn" onclick="selectColor('อยุธยา', this)" style="padding:12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);font-weight:600;cursor:pointer;transition:all .2s;">อยุธยา (ชมพู)</button>
+            <button type="button" class="color-btn" onclick="selectColor('อู่ทอง', this)" style="padding:12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);font-weight:600;cursor:pointer;transition:all .2s;">อู่ทอง (ม่วง)</button>
+            <button type="button" class="color-btn" onclick="selectColor('รัตนโกสินทร์', this)" style="padding:12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);font-weight:600;cursor:pointer;transition:all .2s;">รัตนโกสินทร์ (เขียว)</button>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>ห้องเรียน</label>
+              <input id="otherRoom" placeholder="เช่น ม.5/1">
+            </div>
+            <div>
+              <label>เลขที่</label>
+              <input id="otherClassNumber" inputmode="numeric" placeholder="เช่น 12">
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="confirmOtherTeam()" style="margin-top:16px; padding:10px; font-size:14px;">ยืนยันคณะอื่นๆ</button>
         </div>
-        <div>
-          <label for="classNumber">เลขที่</label>
-          <input id="classNumber" inputmode="numeric" placeholder="เช่น 12" autocomplete="off">
-        </div>
+      </div>
+
+      <!-- กล่องแสดงคณะที่เลือกแล้ว -->
+      <div id="selectedTeamDisplay" style="display:none; margin-top:16px; padding:16px; border-radius:8px; background:rgba(40,167,69,0.1); border:1px solid #28a745;">
+        <div style="font-size:13px; color:#198754; font-weight:600; margin-bottom:4px;">เลือกคณะเรียบร้อย:</div>
+        <div id="selectedTeamText" style="font-size:16px; font-weight:700; color:var(--text-main);"></div>
       </div>
     </div>
 
@@ -325,6 +407,24 @@
       
     </div>
     <button style="background:transparent;border:none;color:var(--text-muted);width:100%;margin-top:20px;cursor:pointer;text-decoration:underline;font-family:inherit;font-size:14px;" onclick="closeModal('pantsModal')">ปิดหน้าต่าง</button>
+  </div>
+</div>
+
+<!-- Modal สำหรับดูรูปกางเกงและยืนยัน -->
+<div class="modal-overlay" id="pantsPreviewModal" style="z-index: 1005;">
+  <div class="modal-content" style="max-width:450px; padding:0; overflow:hidden; background:var(--bg-card);">
+    <div style="position:relative; background:var(--bg-input);">
+      <img id="pantsPreviewImg" src="" alt="Pants Preview" style="width:100%; height:280px; object-fit:contain; display:block; border-bottom:1px solid var(--border-color);">
+      <button onclick="closeModal('pantsPreviewModal')" style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.6); color:#fff; border:none; width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px);">&times;</button>
+    </div>
+    <div style="padding:24px;">
+      <h3 id="pantsPreviewTitle" style="font-size:20px; margin-bottom:8px; color:var(--text-main); text-align:left;">ชื่อกางเกง</h3>
+      <div id="pantsPreviewPrice" style="font-size:24px; color:var(--brand-red); font-weight:700; margin-bottom:24px;">149 THB</div>
+      <div style="display:flex; gap:12px;">
+        <button onclick="closeModal('pantsPreviewModal')" style="flex:1; padding:14px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-main); font-weight:600; cursor:pointer; font-family:inherit; transition:all .2s;">ยกเลิก</button>
+        <button id="confirmPantsBtn" style="flex:2; padding:14px; border-radius:8px; border:none; background:var(--brand-red); color:#fff; font-weight:600; cursor:pointer; font-family:inherit; transition:all .2s; box-shadow:0 4px 12px rgba(211,47,47,0.2);">ยืนยันการเลือก</button>
+      </div>
+    </div>
   </div>
 </div>
 
