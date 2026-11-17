@@ -257,7 +257,6 @@ function restoreDraft() {
     else state.basePrice = 279;
     state.allow2XL = !d.style.startsWith("กางเกง");
     
-    // 🔴 ซ่อน/แสดงกลุ่มชื่อสกรีนตามประเภทสินค้า
     if (d.style.startsWith("กางเกง")) {
       $("backNameGroup").style.display = "none";
       $("sumBackRow").style.display = "none";
@@ -426,7 +425,6 @@ function selectProductFromModal() {
   closeModal("productModal");
   state.style = selectedProductFromModal;
   
-  // 🔴 แสดงช่องชื่อสกรีนกลับมาเมื่อเลือกเสื้อ
   $("backNameGroup").style.display = "block";
   $("sumBackRow").style.display = "flex";
 
@@ -477,7 +475,6 @@ function selectPants(name, price) {
   $("pantsPreviewModal").style.display = "flex";
 }
 
-// 🔴 ยืนยันการเลือกกางเกง (ผูกกับปุ่ม confirmPantsBtn)
 function confirmPantsSelection() {
   const { name, price } = tempPantsSelection;
   if (!name) return;
@@ -488,12 +485,10 @@ function confirmPantsSelection() {
   state.basePrice = price;
   state.allow2XL = false; 
   
-  // ซ่อนช่องชื่อสกรีน + ล้างค่า (กางเกงไม่สกรีนชื่อ)
   $("backNameGroup").style.display = "none";
   $("backName").value = "";
   $("sumBackRow").style.display = "none";
 
-  // รีเซ็ตไซส์ถ้าอยู่ใน surcharge (กางเกงไม่มี 2XL+)
   if (["2XL","3XL","4XL","5XL","6XL"].includes(state.size)) {
     const mBtn = document.querySelector("#sizePicker .size-btn[data-size='M']");
     if (mBtn) mBtn.click();
@@ -635,7 +630,6 @@ function updateSummary() {
 
 function checkFormValid() {
   let ok = true, missing = [];
-  // 🔴 เช็กชื่อสกรีนแค่ตอนที่สินค้าไม่ใช่กางเกง
   if (!state.style.startsWith("กางเกง") && !$("backName").value.trim()) { ok = false; missing.push("ชื่อสกรีน"); }
   
   if (!$("firstName").value.trim()) { ok = false; missing.push("ชื่อ"); }
@@ -779,7 +773,7 @@ function resetForm() {
   state.selectedClassRoom = "";
   state.selectedClassNumber = "";
   state.selectedTeamCategory = "";
-  state.style = "เสื้อสี";  // 🔴 reset สไตล์กลับค่าเริ่มต้น
+  state.style = "เสื้อสี";  
   $("backNameGroup").style.display = "block";
   $("sumBackRow").style.display = "flex";
   
@@ -1291,11 +1285,9 @@ function updateCountdowns() {
 setInterval(updateCountdowns, 1000); updateCountdowns();
 updateSummary(); checkFormValid();
 
-// 🔴 ผูกปุ่มยืนยันการเลือกกางเกง (pantsPreviewModal)
 const confirmPantsBtnEl = $("confirmPantsBtn");
 if (confirmPantsBtnEl) confirmPantsBtnEl.addEventListener("click", confirmPantsSelection);
 
-// แจ้งเตือนถ้ายังไม่ได้ตั้งค่า backend
 if (!BACKEND_READY) {
   console.warn("[Chiangsaen] ยังไม่ได้ตั้งค่า googleScriptUrl ใน config.js — จะบันทึกออเดอร์ไม่ได้");
   setTimeout(() => toast("ยังไม่ได้ตั้งค่า config.js (googleScriptUrl)", "error"), 800);
