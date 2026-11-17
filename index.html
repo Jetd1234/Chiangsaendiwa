@@ -154,20 +154,10 @@
       <label for="customerPin">ตั้งรหัส PIN 4 หลัก (สำหรับติดตามสถานะกรณีฉุกเฉิน)</label>
       <input id="customerPin" type="text" inputmode="numeric" maxlength="4" placeholder="เช่น 1234" autocomplete="off" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)">
       
-      <!-- เลือกคณะสี -->
-      <label>เลือกคณะสี (เลือก 1 สี)</label>
-      <div class="color-buttons" id="colorButtons" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-        <button type="button" class="color-btn" onclick="selectColor('สีแดง', this)" style="padding:8px 16px;border-radius:20px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);cursor:pointer;">สีแดง</button>
-        <button type="button" class="color-btn" onclick="selectColor('สีเขียว', this)" style="padding:8px 16px;border-radius:20px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);cursor:pointer;">สีเขียว</button>
-        <button type="button" class="color-btn" onclick="selectColor('สีฟ้า', this)" style="padding:8px 16px;border-radius:20px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);cursor:pointer;">สีฟ้า</button>
-        <button type="button" class="color-btn" onclick="selectColor('สีม่วง', this)" style="padding:8px 16px;border-radius:20px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);cursor:pointer;">สีม่วง</button>
-        <button type="button" class="color-btn" onclick="selectColor('สีชมพู', this)" style="padding:8px 16px;border-radius:20px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);cursor:pointer;">สีชมพู</button>
-      </div>
-
       <!-- แสดงเมื่อกดปุ่มคณะสีอื่นๆ -->
       <div id="otherTeamWrapper" style="display:none;margin:0 0 14px;padding:14px;border:1px dashed var(--brand-red);border-radius:12px;">
         <label for="otherTeamColor">ชื่อคณะสีอื่นๆ</label>
-        <input id="otherTeamColor" placeholder="เช่น คณะสีส้ม" autocomplete="off">
+        <input id="otherTeamColor" placeholder="เช่น คณะสีแดง" autocomplete="off">
       </div>
 
       <!-- ห้องและเลขที่แยกช่องกัน ไม่รวมกับคณะสี -->
