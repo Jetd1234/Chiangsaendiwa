@@ -91,11 +91,21 @@ function handleCustomModalOk() {
 }
 
 // ─────────────── STATE & PRICING ───────────────
-const PRICE_RULES = { surcharge: { "2XL": 10, "3XL": 10, "4XL": 10, "5XL": 10 } };
+// 🔴 แก้ไขจุดนี้: ให้ทุกไซส์ 2XL - 6XL บวกเพิ่ม 10 บาทเท่ากันหมด
+const PRICE_RULES = { 
+  surcharge: { 
+    "2XL": 10, 
+    "3XL": 10, 
+    "4XL": 10, 
+    "5XL": 10,
+    "6XL": 10
+  } 
+};
+
 function computePrice(basePrice, size, allow2XL) {
   const base = +basePrice || 0;
   let extra = PRICE_RULES.surcharge[size] || 0;
-  if (allow2XL === false && ["2XL", "3XL", "4XL", "5XL"].includes(size)) extra = 0;
+  if (allow2XL === false && ["2XL", "3XL", "4XL", "5XL", "6XL"].includes(size)) extra = 0;
   return { base, extra, total: base + extra };
 }
 
@@ -370,11 +380,15 @@ function openProductModal(name, price, imgSrc, desc, allow2XL) {
   $("modalProductPrice").textContent = price + " THB";
   $("modalProductImg").src = imgSrc;
   $("modalProductDesc").textContent = desc;
-  const s2 = document.querySelector("#sizePicker .size-btn[data-size='2XL']");
-  if (allow2XL === false) {
-    s2.style.display = "none";
-    if (state.size === "2XL") document.querySelector("#sizePicker .size-btn[data-size='M']").click();
-  } else { s2.style.display = "block"; }
+  
+  // ซ่อน/แสดงปุ่ม 2XL ขึ้นไป ตามเงื่อนไข allow2XL
+  document.querySelectorAll("#sizePicker .size-btn.surcharge").forEach(btn => {
+    btn.style.display = allow2XL === false ? "none" : "block";
+  });
+
+  if (allow2XL === false && ["2XL", "3XL", "4XL", "5XL", "6XL"].includes(state.size)) {
+    document.querySelector("#sizePicker .size-btn[data-size='M']").click();
+  }
   $("productModal").style.display = "flex";
 }
 function selectProductFromModal() {
@@ -878,7 +892,7 @@ function renderDashboard() {
 
   const sz = {};
   orders.forEach(o => { sz[o.size || "—"] = (sz[o.size || "—"] || 0) + 1; });
-  const order = { "S":1,"M":2,"L":3,"XL":4,"2XL":5 };
+  const order = { "SS":1, "S":2, "M":3, "L":4, "XL":5, "2XL":6, "3XL":7, "4XL":8, "5XL":9, "6XL":10 };
   $("dashSizeList").innerHTML = Object.keys(sz).sort((a,b) => (order[a]||99) - (order[b]||99)).map(s => `<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg-input);border-radius:6px;font-size:13px;margin-bottom:6px;"><span>ไซส์ ${escapeHTML(s)}</span><span style="font-weight:600;">${sz[s]} ตัว</span></div>`).join("") || "<p style='color:#888;font-size:13px;'>ไม่มีข้อมูล</p>";
 
   const cl = {};

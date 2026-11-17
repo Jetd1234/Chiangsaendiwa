@@ -44,8 +44,8 @@
       <div class="styles" id="stylePicker" style="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px;">
         
         <div class="product-card">
-          <img src="https://i.ibb.co/YBR3Rcfv/1.jpg" alt="เสื้อสี" onclick="zoomImage(this.src)">
-          <div class="product-card-info" onclick="openProductModal('เสื้อสี', 289, 'https://i.ibb.co/YBR3Rcfv/1.jpg', 'เสื้อสี เนื้อผ้าไมโคเรียบ เบาสบาย', true)">
+          <img src="https://i.ibb.co/kVd0jjKP/S-12615697.jpg" alt="เสื้อสี" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('เสื้อสี', 289, 'https://i.ibb.co/kVd0jjKP/S-12615697.jpg', 'เสื้อสี เนื้อผ้าไมโคเรียบ เบาสบาย', true)">
             <div class="product-card-title">เสื้อสี</div>
             <div class="product-card-price">289 THB</div>
             <div class="btn-buy">ดูรายละเอียด</div>
@@ -130,12 +130,16 @@
       <div class="number-preview-box" id="numberPreviewBox" style="display:none;"><div class="number-preview-text" id="numberPreviewText">00</div></div>
 
       <div class="size-header"><label>ขนาดเสื้อ (Size)</label><button class="btn-guide" onclick="openSizeGuide()">ดูตารางเทียบ</button></div>
-      <div class="sizes" id="sizePicker">
+      <div class="sizes" id="sizePicker" style="grid-template-columns:repeat(4, 1fr);">
         <button type="button" class="size-btn" data-size="S">S</button>
         <button type="button" class="size-btn active" data-size="M">M</button>
         <button type="button" class="size-btn" data-size="L">L</button>
         <button type="button" class="size-btn" data-size="XL">XL</button>
         <button type="button" class="size-btn surcharge" data-size="2XL">2XL</button>
+        <button type="button" class="size-btn surcharge" data-size="3XL">3XL</button>
+        <button type="button" class="size-btn surcharge" data-size="4XL">4XL</button>
+        <button type="button" class="size-btn surcharge" data-size="5XL">5XL</button>
+        <button type="button" class="size-btn surcharge" data-size="6XL">6XL</button>
       </div>
     </div>
 
@@ -273,18 +277,23 @@
 </div>
 
 <div class="modal-overlay" id="sizeModal">
-  <div class="modal-content">
+  <div class="modal-content" style="max-width:500px; max-height:80vh; overflow-y:auto;">
     <h3>ตารางเทียบไซส์</h3>
     <p style="font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:12px;">*ขนาดอาจคลาดเคลื่อนเล็กน้อย</p>
     <table class="size-table">
       <tr><th>ไซส์</th><th>รอบอก (นิ้ว)</th><th>ความยาว (นิ้ว)</th></tr>
+      <tr><td>SS</td><td>34</td><td>25</td></tr>
       <tr><td>S</td><td>36</td><td>26</td></tr>
       <tr><td>M</td><td>38</td><td>27</td></tr>
       <tr><td>L</td><td>40</td><td>28</td></tr>
       <tr><td>XL</td><td>42</td><td>29</td></tr>
-      <tr class="surcharge-row"><td>2XL</td><td>44</td><td>30</td></tr>
+      <tr class="surcharge-row"><td>2XL (+20)</td><td>44</td><td>30</td></tr>
+      <tr class="surcharge-row"><td>3XL (+40)</td><td>46</td><td>31</td></tr>
+      <tr class="surcharge-row"><td>4XL (+60)</td><td>48</td><td>32</td></tr>
+      <tr class="surcharge-row"><td>5XL (+80)</td><td>50</td><td>33</td></tr>
+      <tr class="surcharge-row"><td>6XL (+100)</td><td>52</td><td>34</td></tr>
     </table>
-    <p style="font-size:12px;color:var(--brand-red);text-align:center;margin-top:12px;font-weight:600;">ไซส์2XL + 10 บาท</p>
+    <p style="font-size:12px;color:var(--brand-red);text-align:center;margin-top:12px;font-weight:600;">ไซส์ 2XL ขึ้นไป มีค่าบวกเพิ่มตามขนาด</p>
     <button style="background:transparent;border:none;color:var(--text-muted);width:100%;margin-top:16px;cursor:pointer;text-decoration:underline;" onclick="closeModal('sizeModal')">ปิดหน้าต่าง</button>
   </div>
 </div>
