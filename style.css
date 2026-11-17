@@ -201,3 +201,59 @@ body.dark-mode .timer-item .timer-value.sports { color:#66b3ff; }
   width: 60px;
   height: 60px;
 }
+
+/* ─────────────── CUSTOM PANTS MODAL STYLE ─────────────── */
+#pantsModal .modal-content {
+  animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#pantsModal .pants-option-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 16px 20px;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-color);
+  border-radius: 10px;
+  color: var(--text-main);
+  font-family: "Sarabun", sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+#pantsModal .pants-option-btn:hover {
+  background: var(--bg-card);
+  border-color: var(--brand-red);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(211, 47, 47, 0.15);
+}
+
+#pantsModal .pants-option-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(211, 47, 47, 0.1);
+}
+
+#pantsModal .pants-option-btn .price-tag {
+  font-family: "Kanit", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--brand-red);
+  background: rgba(211, 47, 47, 0.1);
+  padding: 4px 12px;
+  border-radius: 6px;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  margin-left: 12px;
+}
+
+#pantsModal .pants-option-btn:hover .price-tag {
+  background: var(--brand-red);
+  color: #fff;
+}
