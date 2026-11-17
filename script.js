@@ -101,7 +101,7 @@ function computePrice(basePrice, size, allow2XL) {
 
 const state = {
   style: "เสื้อสี", price: 289, basePrice: 289, surcharge: 0, size: "M", allow2XL: true,
-  selectedTeamColor: "", otherTeamOpen: false,
+  selectedTeamColor: "", // เก็บชื่อคณะสี
   slipFile: null, slipFilename: "", slipOCR: "", slipRef: "", slipAmount: null,
   slipAmountMatched: false, slipOCRDone: false,
   idempotencyKey: null, submitLocked: false,
@@ -191,8 +191,9 @@ function saveDraft() {
     backName: $("backName").value, backNumber: $("backNumber").value,
     firstName: $("firstName").value, lastName: $("lastName").value,
     customerEmail: $("customerEmail").value, phone: $("phone").value,
-    customerPin: $("customerPin").value, teamColor: state.selectedTeamColor, otherTeamColor: $("otherTeamColor").value,
-    otherTeamOpen: state.otherTeamOpen, classRoom: $("classRoom").value, classNumber: $("classNumber").value, 
+    customerPin: $("customerPin").value, 
+    teamColor: state.selectedTeamColor,
+    classRoom: $("classRoom").value, classNumber: $("classNumber").value, 
     style: state.style, size: state.size
   })); } catch (e) {}
 }
@@ -206,18 +207,16 @@ function restoreDraft() {
   $("customerPin").value = d.customerPin || "";
   $("classRoom").value = d.classRoom || "";
   $("classNumber").value = d.classNumber || "";
+  
   state.selectedTeamColor = d.teamColor || "";
-  document.querySelectorAll("#colorButtons .color-btn").forEach(b => {
-    const selected = b.textContent.trim() === state.selectedTeamColor;
-    b.classList.toggle("active", selected);
-    b.style.background = selected ? "var(--brand-red)" : "var(--bg-input)";
-    b.style.color = selected ? "#fff" : "var(--text-main)";
-    b.style.borderColor = selected ? "var(--brand-red)" : "var(--border-color)";
+  document.querySelectorAll("#colorButtons .color-btn").forEach(btn => {
+    const btnText = btn.textContent.trim().split(" ")[0]; // ดึงชื่อคณะก่อนเจอวงเล็บ
+    const selected = btnText === state.selectedTeamColor;
+    btn.classList.toggle("active", selected);
+    btn.style.background = selected ? "var(--brand-red)" : "var(--bg-input)";
+    btn.style.color = selected ? "#fff" : "var(--text-main)";
+    btn.style.borderColor = selected ? "var(--brand-red)" : "var(--border-color)";
   });
-  $("otherTeamColor").value = d.otherTeamColor || "";
-  state.otherTeamOpen = !!d.otherTeamOpen || !!d.otherTeamColor;
-  $("otherTeamWrapper").style.display = state.otherTeamOpen ? "block" : "none";
-  $("toggleOtherTeamBtn").textContent = state.otherTeamOpen ? "− ปิดคณะสีอื่นๆ" : "+ คณะสีอื่นๆ";
   
   if (d.style) {
     state.style = d.style;
@@ -394,7 +393,7 @@ function selectProductFromModal() {
   const calc = computePrice(state.basePrice, state.size, state.allow2XL);
   state.surcharge = calc.extra; state.price = calc.total;
   updateSummary(); checkFormValid(); saveDraft();
-  window.scrollTo({ top: $("colorButtons").offsetTop - 100, behavior: 'smooth' });
+  window.scrollTo({ top: $("colorButtons").offsetTop - 150, behavior: 'smooth' });
   toast("เลือกแบบ " + selectedProductFromModal + " แล้ว", "success");
 }
 
@@ -408,7 +407,7 @@ function selectPants(name, price) {
   const calc = computePrice(state.basePrice, state.size, state.allow2XL);
   state.surcharge = calc.extra; state.price = calc.total;
   updateSummary(); checkFormValid(); saveDraft();
-  window.scrollTo({ top: $("colorButtons").offsetTop - 100, behavior: 'smooth' });
+  window.scrollTo({ top: $("colorButtons").offsetTop - 150, behavior: 'smooth' });
   toast("เลือกแบบ " + name + " แล้ว", "success");
 }
 
@@ -436,33 +435,13 @@ function selectColor(colorName, btnElement) {
   });
   updateSummary(); checkFormValid(); saveDraft();
 }
-function toggleOtherTeam() {
-  state.otherTeamOpen = !state.otherTeamOpen;
-  $("otherTeamWrapper").style.display = state.otherTeamOpen ? "block" : "none";
-  $("toggleOtherTeamBtn").textContent = state.otherTeamOpen ? "− ปิดคณะสีอื่นๆ" : "+ คณะสีอื่นๆ";
-  if (state.otherTeamOpen) {
-    state.selectedTeamColor = "";
-    document.querySelectorAll("#colorButtons .color-btn").forEach(btn => {
-      btn.classList.remove("active");
-      btn.style.background = "var(--bg-input)";
-      btn.style.color = "var(--text-main)";
-      btn.style.borderColor = "var(--border-color)";
-    });
-    $("otherTeamColor").focus();
-  } else {
-    $("otherTeamColor").value = "";
-  }
-  updateSummary(); checkFormValid(); saveDraft();
-}
 
 function updateSummary() {
   $("sumStyle").textContent = state.style;
   $("sumSize").textContent = state.size;
   $("sumBack").textContent = $("backName").value.trim() || "—";
   $("sumNumber").textContent = $("backNumber").value.trim() || "—";
-  // แสดงคณะสี ห้องเรียน และเลขที่แยกจากกัน
-  const colorValue = state.otherTeamOpen ? $("otherTeamColor").value.trim() : state.selectedTeamColor;
-  $("sumColor").textContent = colorValue || "—";
+  $("sumColor").textContent = state.selectedTeamColor || "—";
   $("sumClass").textContent = $("classRoom").value.trim() || "—";
   $("sumClassNumber").textContent = $("classNumber").value.trim() || "—";
   
@@ -471,7 +450,7 @@ function updateSummary() {
   else el.textContent = formatTHB(state.price);
   if ($("payAmountBank")) $("payAmountBank").textContent = formatTHB(state.price);
 }
-["backName","firstName","lastName","phone","customerEmail", "customerPin", "classRoom", "classNumber", "otherTeamColor"].forEach(id => {
+["backName","firstName","lastName","phone","customerEmail", "customerPin", "classRoom", "classNumber"].forEach(id => {
   $(id).addEventListener("input", () => { updateSummary(); checkFormValid(); saveDraft(); });
 });
 
@@ -482,8 +461,7 @@ function checkFormValid() {
   if (!$("lastName").value.trim()) { ok = false; missing.push("นามสกุล"); }
   if (!$("customerEmail").value.includes("@")) { ok = false; missing.push("อีเมล"); }
   if ($("phone").value.replace(/\D/g,"").length < 9) { ok = false; missing.push("เบอร์โทร"); }
-  const chosenColor = state.otherTeamOpen ? $("otherTeamColor").value.trim() : state.selectedTeamColor;
-  if (!chosenColor) { ok = false; missing.push(state.otherTeamOpen ? "ชื่อคณะสีอื่นๆ" : "คณะสี"); }
+  if (!state.selectedTeamColor) { ok = false; missing.push("คณะสี"); }
   if (!$("classRoom").value.trim()) { ok = false; missing.push("ห้องเรียน"); }
   if (!$("classNumber").value.trim()) { ok = false; missing.push("เลขที่"); }
   if (!state.slipFile) { ok = false; missing.push("สลิปโอนเงิน"); }
@@ -511,14 +489,14 @@ $("submitBtn").addEventListener("click", async () => {
     if (!state.idempotencyKey) state.idempotencyKey = newIdempotencyKey();
     const slipBase64 = await fileToBase64_(state.slipFile);
     
-    // ส่งคณะสี ห้องเรียน และเลขที่แยกฟิลด์ ไม่รวมคณะสีกับห้อง
+    // รวมห้องและเลขที่
+    const classRoomFull = $("classRoom").value.trim() + ($("classNumber").value.trim() ? " เลขที่ " + $("classNumber").value.trim() : "");
 
     const orderData = {
       idempotencyKey: state.idempotencyKey,
       fullName: $("firstName").value.trim() + " " + $("lastName").value.trim(),
-      teamColor: state.otherTeamOpen ? $("otherTeamColor").value.trim() : state.selectedTeamColor,
-      classRoom: $("classRoom").value.trim(),
-      classNumber: $("classNumber").value.trim(),
+      teamColor: state.selectedTeamColor,
+      classRoom: classRoomFull,
       phone: $("phone").value.trim(),
       customerPin: $("customerPin").value.trim(),
       style: state.style, size: state.size,
@@ -540,8 +518,9 @@ $("submitBtn").addEventListener("click", async () => {
     $("screen-form").style.display = "none";
     $("screen-success").style.display = "block";
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     const realId = r.orderId || "CS69-XXXX";
-    await drawDigitalTicket(realId, orderData.fullName, orderData.backName, orderData.backNumber, combinedClass, orderData.style, orderData.size, state.price);
+    await drawDigitalTicket(realId, orderData.fullName, orderData.backName, orderData.backNumber, orderData.classRoom, orderData.style, orderData.size, state.price);
     state.lastOrderId = realId;
     $("shareRow").style.display = "flex";
   } catch (err) {
@@ -609,10 +588,8 @@ async function copyToClipboard(t, msg) {
 }
 function resetForm() {
   $("screen-history").style.display = "none";
-  ["backName","backNumber","firstName","lastName","phone","classRoom","classNumber","customerEmail","customerPin","otherTeamColor"].forEach(id => $(id).value = "");
-  state.selectedTeamColor = ""; state.otherTeamOpen = false;
-  $("otherTeamWrapper").style.display = "none";
-  $("toggleOtherTeamBtn").textContent = "+ คณะสีอื่นๆ";
+  ["backName","backNumber","firstName","lastName","phone","classRoom","classNumber","customerEmail","customerPin"].forEach(id => $(id).value = "");
+  state.selectedTeamColor = "";
   document.querySelectorAll("#colorButtons .color-btn").forEach(btn => {
     btn.classList.remove("active"); btn.style.background = "var(--bg-input)";
     btn.style.color = "var(--text-main)"; btn.style.borderColor = "var(--border-color)";

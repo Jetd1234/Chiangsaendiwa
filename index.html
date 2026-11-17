@@ -140,10 +140,7 @@
     </div>
 
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-        <h2 style="margin:0;"><span class="num">3</span> ข้อมูลผู้สั่ง &amp; ห้องเรียน</h2>
-        <button type="button" id="toggleOtherTeamBtn" onclick="toggleOtherTeam()" style="padding:8px 14px;border-radius:10px;border:1px solid var(--brand-red);background:transparent;color:var(--brand-red);font-weight:700;cursor:pointer;">+ คณะสีอื่นๆ</button>
-      </div>
+      <h2><span class="num">3</span> ข้อมูลผู้สั่ง &amp; ห้องเรียน</h2>
       <div class="row"><div><label for="firstName">ชื่อ</label><input id="firstName" placeholder="ชื่อ" autocomplete="given-name"></div><div><label for="lastName">นามสกุล</label><input id="lastName" placeholder="นามสกุล" autocomplete="family-name"></div></div>
       <label for="customerEmail">อีเมล (สำหรับรับแจ้งเตือนสถานะ + OTP ติดตาม)</label>
       <input id="customerEmail" type="email" placeholder="example@email.com" autocomplete="email">
@@ -154,13 +151,15 @@
       <label for="customerPin">ตั้งรหัส PIN 4 หลัก (สำหรับติดตามสถานะกรณีฉุกเฉิน)</label>
       <input id="customerPin" type="text" inputmode="numeric" maxlength="4" placeholder="เช่น 1234" autocomplete="off" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)">
       
-      <!-- แสดงเมื่อกดปุ่มคณะสีอื่นๆ -->
-      <div id="otherTeamWrapper" style="display:none;margin:0 0 14px;padding:14px;border:1px dashed var(--brand-red);border-radius:12px;">
-        <label for="otherTeamColor">ชื่อคณะสีอื่นๆ</label>
-        <input id="otherTeamColor" placeholder="เช่น คณะสีแดง" autocomplete="off">
+      <label>คณะสี</label>
+      <div id="colorButtons" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;">
+        <button type="button" class="color-btn" onclick="selectColor('เชียงแสน', this)" style="padding:12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);font-weight:600;cursor:pointer;transition:all .2s;">เชียงแสน (แดง)</button>
+        <button type="button" class="color-btn" onclick="selectColor('สุโขทัย', this)" style="padding:12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);font-weight:600;cursor:pointer;transition:all .2s;">สุโขทัย (ฟ้า)</button>
+        <button type="button" class="color-btn" onclick="selectColor('อยุธยา', this)" style="padding:12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);font-weight:600;cursor:pointer;transition:all .2s;">อยุธยา (ชมพู)</button>
+        <button type="button" class="color-btn" onclick="selectColor('อู่ทอง', this)" style="padding:12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);font-weight:600;cursor:pointer;transition:all .2s;">อู่ทอง (ม่วง)</button>
+        <button type="button" class="color-btn" onclick="selectColor('รัตนโกสินทร์', this)" style="padding:12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);font-weight:600;cursor:pointer;transition:all .2s;grid-column:1/-1;">รัตนโกสินทร์ (เขียว)</button>
       </div>
 
-      <!-- ห้องและเลขที่แยกช่องกัน ไม่รวมกับคณะสี -->
       <div class="row">
         <div>
           <label for="classRoom">ห้องเรียน</label>
