@@ -221,9 +221,9 @@ function restoreDraft() {
   if (d.style) {
     state.style = d.style;
     if (["เสื้อสี", "เสื้อฟุตบอล", "เสื้อฟุตบอลม.ต้น", "เสื้อประตูมัธยมศึกษาตอนต้น", "เสื้อประตูมัธยมศึกษาตอนปลาย"].includes(d.style)) state.basePrice = 289;
-    else if (d.style.includes("กางเกง")) state.basePrice = 149;
+    else if (d.style.startsWith("กางเกง")) state.basePrice = 149;
     else state.basePrice = 279;
-    state.allow2XL = !d.style.includes("กางเกง");
+    state.allow2XL = !d.style.startsWith("กางเกง");
   }
   if (d.size) {
     document.querySelectorAll("#sizePicker .size-btn").forEach(b => b.classList.toggle("active", b.dataset.size === d.size));
@@ -384,7 +384,7 @@ function selectProductFromModal() {
   if (["เสื้อสี", "เสื้อฟุตบอล", "เสื้อฟุตบอลม.ต้น", "เสื้อประตูมัธยมศึกษาตอนต้น", "เสื้อประตูมัธยมศึกษาตอนปลาย"].includes(selectedProductFromModal)) { 
     state.basePrice = 289; state.allow2XL = true; 
   }
-  else if (selectedProductFromModal.includes("กางเกง")) { 
+  else if (selectedProductFromModal.startsWith("กางเกง")) { 
     state.basePrice = 149; state.allow2XL = false; 
   }
   else { 
@@ -397,7 +397,6 @@ function selectProductFromModal() {
   toast("เลือกแบบ " + selectedProductFromModal + " แล้ว", "success");
 }
 
-// 🆕 ระบบกางเกง 4 แบบ
 function openPantsModal() { $("pantsModal").style.display = "flex"; }
 function selectPants(name, price) {
   closeModal("pantsModal");
@@ -489,7 +488,6 @@ $("submitBtn").addEventListener("click", async () => {
     if (!state.idempotencyKey) state.idempotencyKey = newIdempotencyKey();
     const slipBase64 = await fileToBase64_(state.slipFile);
     
-    // รวมห้องและเลขที่
     const classRoomFull = $("classRoom").value.trim() + ($("classNumber").value.trim() ? " เลขที่ " + $("classNumber").value.trim() : "");
 
     const orderData = {
