@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Sarabun:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<!-- Script โหลด Tesseract แบบ Lazy Load ใน script.js แทน -->
 </head>
 <body class="dark-mode">
 
@@ -44,82 +43,74 @@
       <h2><span class="num">1</span> รูปแบบเสื้อ</h2>
       <div class="styles" id="stylePicker" style="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px;">
         
-        <!-- 1. เสื้อสี -->
         <div class="product-card">
-          <img src="https://s.imgz.io/2026/11/16/113a38078341b99c6.jpg" alt="เสื้อสี" onerror="this.src='https://s.imgz.io/2026/11/16/113a38078341b99c6.jpg'" onclick="zoomImage(this.src)">
-          <div class="product-card-info" onclick="openProductModal('เสื้อสี', 289, 'https://s.imgz.io/2026/11/16/113a38078341b99c6.jpg', 'เสื้อสี เนื้อผ้าไมโคเรียบ เบาสบาย', true)">
+          <img src="https://i.ibb.co/YBR3Rcfv/1.jpg" alt="เสื้อสี" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('เสื้อสี', 289, 'https://i.ibb.co/YBR3Rcfv/1.jpg', 'เสื้อสี เนื้อผ้าไมโคเรียบ เบาสบาย', true)">
             <div class="product-card-title">เสื้อสี</div>
             <div class="product-card-price">289 THB</div>
             <div class="btn-buy">ดูรายละเอียด</div>
           </div>
         </div>
 
-        <!-- 2. เสื้อวอลเลย์บอล -->
         <div class="product-card">
-          <img src="https://s.imgz.io/2026/11/16/230acf329738f9993.jpg" alt="เสื้อวอลเลย์บอล" onerror="this.src='https://s.imgz.io/2026/11/16/230acf329738f9993.jpg'" onclick="zoomImage(this.src)">
-          <div class="product-card-info" onclick="openProductModal('เสื้อวอลเลย์บอล', 279, 'https://s.imgz.io/2026/11/16/230acf329738f9993.jpg', 'เสื้อวอลเลย์บอล เนื้อผ้ายืดหยุ่น ระบายเหงื่อได้ดี', true)">
+          <img src="https://i.ibb.co/LdC3mB3d/2.jpg" alt="เสื้อวอลเลย์บอล" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('เสื้อวอลเลย์บอล', 279, 'https://i.ibb.co/LdC3mB3d/2.jpg', 'เสื้อวอลเลย์บอล เนื้อผ้ายืดหยุ่น ระบายเหงื่อได้ดี', true)">
             <div class="product-card-title">เสื้อวอลเลย์บอล</div>
             <div class="product-card-price">279 THB</div>
             <div class="btn-buy">ดูรายละเอียด</div>
           </div>
         </div>
 
-        <!-- 3. เสื้อบาสเกตบอล -->
         <div class="product-card">
-          <img src="https://s.imgz.io/2026/11/16/30a6204fb204bcca7.jpg" alt="เสื้อบาส" onerror="this.src='https://s.imgz.io/2026/11/16/30a6204fb204bcca7.jpg'" onclick="zoomImage(this.src)">
-          <div class="product-card-info" onclick="openProductModal('เสื้อบาสเกตบอล', 279, 'https://s.imgz.io/2026/11/16/30a6204fb204bcca7.jpg', 'เสื้อบาสเกตบอล เนื้อผ้าเม็ดข้าวโพด', true)">
+          <img src="https://i.ibb.co/fdJwVwpx/3.jpg" alt="เสื้อบาส" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('เสื้อบาสเกตบอล', 279, 'https://i.ibb.co/fdJwVwpx/3.jpg', 'เสื้อบาสเกตบอล เนื้อผ้าเม็ดข้าวโพด', true)">
             <div class="product-card-title">เสื้อบาสเกตบอล</div>
             <div class="product-card-price">279 THB</div>
             <div class="btn-buy">ดูรายละเอียด</div>
           </div>
         </div>
 
-        <!-- 4. เสื้อฟุตบอลม.ปลาย -->
         <div class="product-card">
-          <img src="https://s.imgz.io/2026/11/16/64b29ce7c293c9288.jpg" alt="เสื้อฟุตบอล" onerror="this.src='https://s.imgz.io/2026/11/16/64b29ce7c293c9288.jpg'" onclick="zoomImage(this.src)">
-          <div class="product-card-info" onclick="openProductModal('เสื้อฟุตบอล', 289, 'https://s.imgz.io/2026/11/16/64b29ce7c293c9288.jpg', 'เสื้อฟุตบอล เนื้อผ้าเม็ดข้าวโพด', true)">
+          <img src="https://i.ibb.co/N6ggpN9K/6.jpg" alt="เสื้อฟุตบอล" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('เสื้อฟุตบอล', 289, 'https://i.ibb.co/N6ggpN9K/6.jpg', 'เสื้อฟุตบอล เนื้อผ้าเม็ดข้าวโพด', true)">
             <div class="product-card-title">เสื้อฟุตบอลม.ปลาย</div>
             <div class="product-card-price">289 THB</div>
             <div class="btn-buy">ดูรายละเอียด</div>
           </div>
         </div>
 
-        <!-- 8. เสื้อฟุตบอลม.ต้น -->
         <div class="product-card">
-          <img src="https://s.imgz.io/2026/11/16/4129e9b8ea48531a9.jpg" alt="เสื้อฟุตบอล" onerror="this.src='https://s.imgz.io/2026/11/16/4129e9b8ea48531a9.jpg'" onclick="zoomImage(this.src)">
-          <div class="product-card-info" onclick="openProductModal('เสื้อฟุตบอล', 289, 'https://s.imgz.io/2026/11/16/4129e9b8ea48531a9.jpg', 'เสื้อฟุตบอล เนื้อผ้าเม็ดข้าวโพด', true)">
+          <img src="https://i.ibb.co/JjzK1DwN/4.jpg" alt="เสื้อฟุตบอล" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('เสื้อฟุตบอล', 289, 'https://i.ibb.co/JjzK1DwN/4.jpg', 'เสื้อฟุตบอล เนื้อผ้าเม็ดข้าวโพด', true)">
             <div class="product-card-title">เสื้อฟุตบอลม.ต้น</div>
             <div class="product-card-price">289 THB</div>
             <div class="btn-buy">ดูรายละเอียด</div>
           </div>
         </div>
 
-        <!-- 5. กางเกงฟุตบอล -->
         <div class="product-card">
-          <img src="https://via.placeholder.com/300x300?text=No+Image" alt="กางเกงฟุตบอล" onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'" onclick="zoomImage(this.src)">
-          <div class="product-card-info" onclick="openProductModal('กางเกงฟุตบอล', 149, 'https://via.placeholder.com/300x300?text=No+Image', 'กางเกงฟุตบอล ทรงสปอร์ต เนื้อผ้าเบา', false)">
-            <div class="product-card-title">กางเกงฟุตบอล</div>
-            <div class="product-card-price">149 THB</div>
-            <div class="btn-buy">ดูรายละเอียด</div>
-          </div>
-        </div>
-
-        <!-- 🆕 6. เสื้อประตูมัธยมศึกษาตอนต้น -->
-        <div class="product-card">
-          <img src="https://s.imgz.io/2026/11/16/5c8c106ecefc9ee7b.jpg" alt="เสื้อประตู ม.ต้น" onerror="this.src='https://s.imgz.io/2026/11/16/5c8c106ecefc9ee7b.jpg'" onclick="zoomImage(this.src)">
-          <div class="product-card-info" onclick="openProductModal('เสื้อประตูมัธยมศึกษาตอนต้น', 289, 'https://s.imgz.io/2026/11/16/5c8c106ecefc9ee7b.jpg', 'เสื้อประตู ระดับชั้นมัธยมศึกษาตอนต้น', true)">
+          <img src="https://i.ibb.co/jZ4sWpd5/5.jpg" alt="เสื้อประตู ม.ต้น" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('เสื้อประตูมัธยมศึกษาตอนต้น', 289, 'https://i.ibb.co/jZ4sWpd5/5.jpg', 'เสื้อประตู ระดับชั้นมัธยมศึกษาตอนต้น', true)">
             <div class="product-card-title">เสื้อประตู ม.ต้น</div>
             <div class="product-card-price">289 THB</div>
             <div class="btn-buy">ดูรายละเอียด</div>
           </div>
         </div>
 
-        <!-- 🆕 7. เสื้อประตูมัธยมศึกษาตอนปลาย -->
         <div class="product-card">
-          <img src="https://s.imgz.io/2026/11/16/7adaebf91b3c32822.jpg" alt="เสื้อประตู ม.ปลาย" onerror="this.src='https://s.imgz.io/2026/11/16/7adaebf91b3c32822.jpg'" onclick="zoomImage(this.src)">
-          <div class="product-card-info" onclick="openProductModal('เสื้อประตูมัธยมศึกษาตอนปลาย', 289, 'https://s.imgz.io/2026/11/16/7adaebf91b3c32822.jpg', 'เสื้อประตู ระดับชั้นมัธยมศึกษาตอนปลาย', true)">
+          <img src="https://i.ibb.co/yFd3XFXk/7.jpg" alt="เสื้อประตู ม.ปลาย" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openProductModal('เสื้อประตูมัธยมศึกษาตอนปลาย', 289, 'https://i.ibb.co/yFd3XFXk/7.jpg', 'เสื้อประตู ระดับชั้นมัธยมศึกษาตอนปลาย', true)">
             <div class="product-card-title">เสื้อประตู ม.ปลาย</div>
             <div class="product-card-price">289 THB</div>
+            <div class="btn-buy">ดูรายละเอียด</div>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <img src="https://placehold.co/300x300/1e1e1e/ffffff?text=Shorts" alt="กางเกง" onclick="zoomImage(this.src)">
+          <div class="product-card-info" onclick="openPantsModal()">
+            <div class="product-card-title">กางเกง (5 แบบ)</div>
+            <div class="product-card-price">149 THB</div>
             <div class="btn-buy">ดูรายละเอียด</div>
           </div>
         </div>
@@ -132,8 +123,8 @@
       <label for="backName">ชื่อสกรีนหลังเสื้อ</label>
       <input id="backName" maxlength="20" placeholder="พิมพ์ชื่อของคุณ..." autocomplete="off">
       <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:16px;">
-        <label for="backNumber" style="margin:0;">เบอร์หลังเสื้อ (ถ้ามี)</label>
-        <button class="btn-lucky" onclick="randomLuckyNumber()">สุ่มเลขมงคล</button>
+        <label for="backNumber" style="margin:0;">เบอร์หลังเสื้อ</label>
+        <button class="btn-lucky" onclick="randomLuckyNumber()">สุ่มเลขอัตโนมัติ</button>
       </div>
       <input id="backNumber" maxlength="3" inputmode="numeric" placeholder="เช่น 07, 99" autocomplete="off" oninput="this.value=this.value.replace(/\D/g,'').slice(0,3); updateNumberPreview()" style="margin-top:8px;">
       <div class="number-preview-box" id="numberPreviewBox" style="display:none;"><div class="number-preview-text" id="numberPreviewText">00</div></div>
@@ -157,24 +148,31 @@
       <input id="phone" inputmode="tel" placeholder="08xxxxxxxx" autocomplete="tel" oninput="checkPhoneLive()">
       <div id="phoneWarning" style="display:none; color:#dc3545; font-size:13px; margin-top:8px; font-weight:bold; background:rgba(220,53,69,0.1); padding:10px; border-radius:8px; border:1px solid #dc3545;"></div>
       
-      <!-- 🆕 เพิ่มช่องกรอก PIN -->
       <label for="customerPin">ตั้งรหัส PIN 4 หลัก (สำหรับติดตามสถานะกรณีฉุกเฉิน)</label>
       <input id="customerPin" type="text" inputmode="numeric" maxlength="4" placeholder="เช่น 1234" autocomplete="off" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)">
       
-      <label for="classRoom">เลือกห้องเรียน</label>
-      <select id="classRoom">
-        <option value="">-- เลือกห้องเรียน --</option>
-        <optgroup label="มัธยมศึกษาตอนต้น">
-          <option value="ม.1/5">ม.1/5</option><option value="ม.1/6">ม.1/6</option><option value="ม.1/15">ม.1/15</option><option value="ม.1/16">ม.1/16</option>
-          <option value="ม.2/4">ม.2/4</option><option value="ม.2/9">ม.2/9</option><option value="ม.2/10">ม.2/10</option>
-          <option value="ม.3/3">ม.3/3</option><option value="ม.3/13">ม.3/13</option><option value="ม.3/14">ม.3/14</option>
-        </optgroup>
-        <optgroup label="มัธยมศึกษาตอนปลาย">
-          <option value="ม.4/3">ม.4/3</option><option value="ม.4/7">ม.4/7</option><option value="ม.4/8">ม.4/8</option>
-          <option value="ม.5/1">ม.5/1</option><option value="ม.5/6">ม.5/6</option><option value="ม.5/7">ม.5/7</option><option value="ม.5/16">ม.5/16</option>
-          <option value="ม.6/3">ม.6/3</option><option value="ม.6/10">ม.6/10</option><option value="ม.6/11">ม.6/11</option>
-        </optgroup>
-      </select>
+      <!-- 🆕 เลือกคณะสีแบบปุ่ม -->
+      <label>เลือกคณะสี (เลือก 1 สี)</label>
+      <div class="color-buttons" id="colorButtons" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+        <button type="button" class="color-btn" onclick="selectColor('สีแดง', this)" style="padding:8px 16px;border-radius:20px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);cursor:pointer;">สีแดง</button>
+        <button type="button" class="color-btn" onclick="selectColor('สีเขียว', this)" style="padding:8px 16px;border-radius:20px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);cursor:pointer;">สีเขียว</button>
+        <button type="button" class="color-btn" onclick="selectColor('สีฟ้า', this)" style="padding:8px 16px;border-radius:20px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);cursor:pointer;">สีฟ้า</button>
+        <button type="button" class="color-btn" onclick="selectColor('สีม่วง', this)" style="padding:8px 16px;border-radius:20px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);cursor:pointer;">สีม่วง</button>
+        <button type="button" class="color-btn" onclick="selectColor('สีชมพู', this)" style="padding:8px 16px;border-radius:20px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);cursor:pointer;">สีชมพู</button>
+        <button type="button" class="color-btn" onclick="selectColor('อื่นๆ', this)" style="padding:8px 16px;border-radius:20px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);cursor:pointer;">อื่นๆ</button>
+      </div>
+      
+      <!-- 🆕 ช่องพิมพ์สีอื่นๆ (ซ่อนไว้ก่อน) -->
+      <div id="customColorWrapper" style="display:none; margin-bottom:12px;">
+        <label for="customColorInput" style="font-size:13px;color:var(--text-muted);">ระบุสีอื่นๆ:</label>
+        <input id="customColorInput" placeholder="พิมพ์ชื่อสี..." autocomplete="off">
+      </div>
+
+      <!-- ช่องห้องเรียน -->
+      <div>
+        <label for="classRoom">ระบุห้อง/เลขที่ (พิมพ์เอง)</label>
+        <input id="classRoom" placeholder="เช่น ม.5/1 เลขที่ 12" autocomplete="off">
+      </div>
     </div>
 
     <div class="card">
@@ -184,6 +182,7 @@
         <div class="rowline"><span>ไซส์</span><span id="sumSize">M</span></div>
         <div class="rowline"><span>ชื่อสกรีน</span><span id="sumBack">—</span></div>
         <div class="rowline"><span>เบอร์หลัง</span><span id="sumNumber">—</span></div>
+        <div class="rowline"><span>คณะสี</span><span id="sumColor">—</span></div>
         <div class="rowline"><span>ห้องเรียน</span><span id="sumClass">—</span></div>
         <div class="rowline total"><span>ยอดชำระ</span><span id="sumTotal">฿289</span></div>
       </div>
@@ -256,7 +255,6 @@
       <input type="text" id="trackPhoneConfirm" placeholder="เบอร์โทรที่ใช้สั่งซื้อ" inputmode="tel" autocomplete="off" style="margin-bottom:10px;">
       <button class="btn btn-primary" onclick="requestTrackOtp()" id="trackBtn">ขอ OTP ทางอีเมล</button>
       
-      <!-- 🆕 ส่วนตรวจสอบด้วย PIN สำรอง -->
       <div style="margin-top:20px; border-top:1px dashed var(--border-color); padding-top:16px;">
         <p style="font-size:12px; color:#888; margin-bottom:8px;">กรณีไม่ได้รับอีเมล OTP ให้ใช้ PIN ที่ตั้งไว้:</p>
         <input type="text" id="trackPinInput" placeholder="กรอก PIN 4 หลัก" inputmode="numeric" maxlength="4" style="text-align:center;letter-spacing:4px;margin-bottom:8px;">
@@ -293,6 +291,20 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="pantsModal">
+  <div class="modal-content" style="max-width:500px;">
+    <h3 style="color:var(--brand-red);">เลือกแบบกางเกง</h3>
+    <div style="display:flex; flex-direction:column; gap:12px; margin-top:16px;">
+      <button class="btn" style="background:var(--bg-input);border:1px solid var(--border-color);text-align:left;padding:16px;" onclick="selectPants('กางเกงฟุตบอล', 149)">กางเกงฟุตบอล (149 THB)</button>
+      <button class="btn" style="background:var(--bg-input);border:1px solid var(--border-color);text-align:left;padding:16px;" onclick="selectPants('กางเกงฟุตบอล ม.ต้น', 149)">กางเกงฟุตบอล ม.ต้น (149 THB)</button>
+      <button class="btn" style="background:var(--bg-input);border:1px solid var(--border-color);text-align:left;padding:16px;" onclick="selectPants('กางเกงฟุตบอล ม.ปลาย', 149)">กางเกงฟุตบอล ม.ปลาย (149 THB)</button>
+      <button class="btn" style="background:var(--bg-input);border:1px solid var(--border-color);text-align:left;padding:16px;" onclick="selectPants('กางเกงประตูฟุตบอล ม.ต้น', 149)">กางเกงประตูฟุตบอล ม.ต้น (149 THB)</button>
+      <button class="btn" style="background:var(--bg-input);border:1px solid var(--border-color);text-align:left;padding:16px;" onclick="selectPants('กางเกงประตูฟุตบอล ม.ปลาย', 149)">กางเกงประตูฟุตบอล ม.ปลาย (149 THB)</button>
+    </div>
+    <button style="background:transparent;border:none;color:var(--text-muted);width:100%;margin-top:16px;cursor:pointer;text-decoration:underline;" onclick="closeModal('pantsModal')">ปิดหน้าต่าง</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="publicListModal">
   <div class="modal-content">
     <h3>รายชื่อที่สั่งแล้ว</h3>
@@ -322,10 +334,7 @@
         <button onclick="switchAdminTab('dashboard')" id="tabBtnDash">Dashboard</button>
         <button onclick="exportCSV()">Export CSV</button>
         <button onclick="generateStatsLink()">ลิงก์สรุปให้ครู</button>
-        
-        <!-- 🆕 ปุ่ม OTP ฉุกเฉินสำหรับแอดมิน -->
         <button onclick="generateManualOtp()" style="background:#dc3545;color:#fff;border:none;">🆘 ออก OTP ฉุกเฉิน</button>
-        
         <button onclick="logoutAdmin()" style="margin-left:auto;background:transparent;border:none;color:var(--text-muted);">ออก</button>
         <button onclick="closeModal('adminModal')" style="background:transparent;border:none;">ปิด</button>
       </div>
@@ -409,7 +418,6 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- 🆕 Custom Modal สำหรับแจ้งเตือนและยืนยัน (สวยงาม) -->
 <div class="modal-overlay" id="customModal" style="z-index: 9999;">
   <div class="modal-content" style="text-align: center; padding: 30px 20px;">
     <div id="customModalIcon" style="margin-bottom: 16px; display: flex; justify-content: center;"></div>

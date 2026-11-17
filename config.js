@@ -13,7 +13,7 @@
  */
 window.APP_CONFIG = {
   // Google Apps Script Web App (/exec) — ต้อง deploy แบบ "Anyone" (ดู README.md)
-  googleScriptUrl: "https://script.google.com/macros/s/AKfycbxQyjE6P8mKTcihRYbi6CHwd6so1kMrWBl_M3Vp3XlTrOYZv9oY2foz5WG_IhyrtVp_/exec",
+  googleScriptUrl: "https://script.google.com/macros/s/AKfycbyKtrf-jETtlIaEz38vlCeilTwKbX1EolnFp94JuRFfnCiW-M9vll0k0J7hw9YF7KR0/exec",
 
   // ใช้สร้างลิงก์แชร์ (?order= / ?stats=) — เว้นว่าง = ใช้โดเมนปัจจุบันอัตโนมัติ
   siteUrl: "",
