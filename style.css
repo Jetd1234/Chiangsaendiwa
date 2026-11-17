@@ -257,3 +257,25 @@ body.dark-mode .timer-item .timer-value.sports { color:#66b3ff; }
   background: var(--brand-red);
   color: #fff;
 }
+
+/* ─────────────── PANTS PREVIEW MODAL (NEW) ─────────────── */
+#pantsPreviewModal .modal-content {
+  animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#confirmPantsBtn {
+  transition: all 0.2s ease;
+}
+#confirmPantsBtn:hover {
+  background: var(--brand-red-hover) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(211, 47, 47, 0.3) !important;
+}
+#confirmPantsBtn:active {
+  transform: translateY(1px);
+}
+
+/* ─────────────── BACK NAME GROUP (fade) ─────────────── */
+#backNameGroup {
+  transition: opacity 0.2s ease;
+}

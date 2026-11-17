@@ -256,6 +256,15 @@ function restoreDraft() {
     else if (d.style.startsWith("กางเกง")) state.basePrice = 149;
     else state.basePrice = 279;
     state.allow2XL = !d.style.startsWith("กางเกง");
+    
+    // 🔴 ซ่อน/แสดงกลุ่มชื่อสกรีนตามประเภทสินค้า
+    if (d.style.startsWith("กางเกง")) {
+      $("backNameGroup").style.display = "none";
+      $("sumBackRow").style.display = "none";
+    } else {
+      $("backNameGroup").style.display = "block";
+      $("sumBackRow").style.display = "flex";
+    }
   }
   if (d.size) {
     document.querySelectorAll("#sizePicker .size-btn").forEach(b => b.classList.toggle("active", b.dataset.size === d.size));
@@ -403,7 +412,6 @@ function openProductModal(name, price, imgSrc, desc, allow2XL) {
   $("modalProductImg").src = imgSrc;
   $("modalProductDesc").textContent = desc;
   
-  // ซ่อน/แสดงปุ่ม 2XL ขึ้นไป ตามเงื่อนไข allow2XL
   document.querySelectorAll("#sizePicker .size-btn.surcharge").forEach(btn => {
     btn.style.display = allow2XL === false ? "none" : "block";
   });
@@ -420,6 +428,7 @@ function selectProductFromModal() {
   
   // 🔴 แสดงช่องชื่อสกรีนกลับมาเมื่อเลือกเสื้อ
   $("backNameGroup").style.display = "block";
+  $("sumBackRow").style.display = "flex";
 
   if (["เสื้อสี", "เสื้อฟุตบอล", "เสื้อฟุตบอลม.ต้น", "เสื้อประตูมัธยมศึกษาตอนต้น", "เสื้อประตูมัธยมศึกษาตอนปลาย"].includes(selectedProductFromModal)) { 
     state.basePrice = 289; state.allow2XL = true; 
@@ -433,7 +442,9 @@ function selectProductFromModal() {
   const calc = computePrice(state.basePrice, state.size, state.allow2XL);
   state.surcharge = calc.extra; state.price = calc.total;
   updateSummary(); checkFormValid(); saveDraft();
-  window.scrollTo({ top: $("colorButtons") ? $("colorButtons").offsetTop - 150 : 0, behavior: 'smooth' });
+  
+  const anchor = $("otherColorButtons") || $("sizePicker");
+  if (anchor) window.scrollTo({ top: anchor.offsetTop - 150, behavior: 'smooth' });
   toast("เลือกแบบ " + selectedProductFromModal + " แล้ว", "success");
 }
 
@@ -444,48 +455,62 @@ function openPantsModal() { $("pantsModal").style.display = "flex"; }
 function selectPants(name, price) {
   tempPantsSelection = { name, price };
   
-  // 🔴 ตั้งค่ารูปภาพแยกตามแบบที่เลือก
   let imgUrl = "https://i.ibb.co/4Rgd4LFF/CS3.jpg"; 
-  
   if (name === "กางเกงฟุตบอล ม.ต้น") {
-    imgUrl = "https://i.ibb.co/b5Cs2rxq/CS1.jpg"; // เปลี่ยนลิงก์รูป ม.ต้น
+    imgUrl = "https://i.ibb.co/b5Cs2rxq/CS1.jpg";
   } 
   else if (name === "กางเกงฟุตบอล ม.ต้น (ผู้รักษาประตู)") {
-    imgUrl = "https://i.ibb.co/N62pHKcZ/CS1-1.jpg"; // เปลี่ยนลิงก์รูป ม.ต้น (GK)
+    imgUrl = "https://i.ibb.co/N62pHKcZ/CS1-1.jpg";
   } 
   else if (name === "กางเกงฟุตบอล ม.ปลาย") {
-    imgUrl = "https://i.ibb.co/TxV7xH2z/CS2.jpg"; // เปลี่ยนลิงก์รูป ม.ปลาย
+    imgUrl = "https://i.ibb.co/TxV7xH2z/CS2.jpg";
   } 
   else if (name === "กางเกงฟุตบอล ม.ปลาย (ผู้รักษาประตู)") {
-    imgUrl = "https://i.ibb.co/8LZ5v9my/CS2-1.jpg"; // เปลี่ยนลิงก์รูป ม.ปลาย (GK)
+    imgUrl = "https://i.ibb.co/8LZ5v9my/CS2-1.jpg";
   }
 
   $("pantsPreviewImg").src = imgUrl;
   $("pantsPreviewTitle").textContent = name;
   $("pantsPreviewPrice").textContent = price + " THB";
   
-  // ซ่อนหน้าเลือกแบบก่อน แล้วโชว์หน้าพรีวิว
   closeModal("pantsModal"); 
   $("pantsPreviewModal").style.display = "flex";
-    closeModal("pantsPreviewModal");
-    state.style = tempPantsSelection.name;
-    state.basePrice = tempPantsSelection.price;
-    state.allow2XL = false; 
-    
-    // 🔴 ซ่อนช่องชื่อสกรีนเมื่อเลือกกางเกง
-    $("backNameGroup").style.display = "none";
+}
 
-    const calc = computePrice(state.basePrice, state.size, state.allow2XL);
-    state.surcharge = calc.extra; 
-    state.price = calc.total;
-    
-    updateSummary(); 
-    checkFormValid(); 
-    saveDraft();
-    
-    window.scrollTo({ top: $("colorButtons").offsetTop - 150, behavior: 'smooth' });
-    toast("เลือกแบบ " + state.style + " แล้ว", "success");
-  };
+// 🔴 ยืนยันการเลือกกางเกง (ผูกกับปุ่ม confirmPantsBtn)
+function confirmPantsSelection() {
+  const { name, price } = tempPantsSelection;
+  if (!name) return;
+
+  closeModal("pantsPreviewModal");
+
+  state.style = name;
+  state.basePrice = price;
+  state.allow2XL = false; 
+  
+  // ซ่อนช่องชื่อสกรีน + ล้างค่า (กางเกงไม่สกรีนชื่อ)
+  $("backNameGroup").style.display = "none";
+  $("backName").value = "";
+  $("sumBackRow").style.display = "none";
+
+  // รีเซ็ตไซส์ถ้าอยู่ใน surcharge (กางเกงไม่มี 2XL+)
+  if (["2XL","3XL","4XL","5XL","6XL"].includes(state.size)) {
+    const mBtn = document.querySelector("#sizePicker .size-btn[data-size='M']");
+    if (mBtn) mBtn.click();
+  }
+
+  const calc = computePrice(state.basePrice, state.size, state.allow2XL);
+  state.surcharge = calc.extra; 
+  state.price = calc.total;
+  
+  updateSummary(); 
+  checkFormValid(); 
+  saveDraft();
+  
+  const anchor = $("otherColorButtons") || $("sizePicker");
+  if (anchor) window.scrollTo({ top: anchor.offsetTop - 150, behavior: 'smooth' });
+  toast("เลือกแบบ " + state.style + " แล้ว", "success");
+}
 
 function zoomImage(src) { $("lightboxImg").src = src; $("imageLightbox").style.display = "flex"; }
 function closeLightbox() { $("imageLightbox").style.display = "none"; $("lightboxImg").src = ""; }
@@ -502,7 +527,6 @@ document.querySelectorAll("#sizePicker .size-btn").forEach(btn => {
 });
 
 // ─────────────── ระบบคณะสี (2 Dropdown) ───────────────
-
 function toggleTeamCategory(category) {
   const isCs = category === 'chiangsaen';
   const btnCs = $("btnChiangsaen");
@@ -515,7 +539,6 @@ function toggleTeamCategory(category) {
     panelCs.style.display = isOpen ? "none" : "block";
     btnCs.classList.toggle("active", !isOpen);
     
-    // ปิดอีกอัน
     panelOthers.style.display = "none";
     btnOthers.classList.remove("active");
   } else {
@@ -523,13 +546,11 @@ function toggleTeamCategory(category) {
     panelOthers.style.display = isOpen ? "none" : "block";
     btnOthers.classList.toggle("active", !isOpen);
     
-    // ปิดอีกอัน
     panelCs.style.display = "none";
     btnCs.classList.remove("active");
   }
 }
 
-// กดยืนยันคณะเชียงแสน
 function confirmChiangsaen() {
   const roomLow = $("csRoomLow").value;
   const roomHigh = $("csRoomHigh").value;
@@ -547,14 +568,12 @@ function confirmChiangsaen() {
 
   updateTeamDisplay(`คณะเชียงแสน (แดง) - ${finalRoom} เลขที่ ${classNum}`);
   
-  // ปิด Accordion
   $("panelChiangsaen").style.display = "none";
   $("btnChiangsaen").classList.remove("active");
 
   updateSummary(); checkFormValid(); saveDraft();
 }
 
-// กดยืนยันคณะอื่นๆ
 function confirmOtherTeam() {
   const color = state.selectedTeamColor;
   const room = $("otherRoom").value.trim();
@@ -570,7 +589,6 @@ function confirmOtherTeam() {
 
   updateTeamDisplay(`คณะ${color} - ${room} เลขที่ ${classNum}`);
   
-  // ปิด Accordion
   $("panelOthers").style.display = "none";
   $("btnOthers").classList.remove("active");
 
@@ -582,9 +600,8 @@ function updateTeamDisplay(text) {
   $("selectedTeamText").textContent = text;
 }
 
-// เลือกสี (แค่ไฮไลท์ปุ่ม)
 function selectColor(colorName, btnElement) {
-  if (colorName === "เชียงแสน") return; // กันบั๊ก
+  if (colorName === "เชียงแสน") return;
   state.selectedTeamColor = colorName;
   document.querySelectorAll("#otherColorButtons .color-btn").forEach(btn => {
     const selected = btn === btnElement;
@@ -602,7 +619,6 @@ function updateSummary() {
   $("sumBack").textContent = $("backName").value.trim() || "—";
   $("sumNumber").textContent = $("backNumber").value.trim() || "—";
   
-  // แสดงคณะและห้อง
   const colorText = state.selectedTeamCategory === 'chiangsaen' ? "เชียงแสน" : (state.selectedTeamColor || "—");
   $("sumColor").textContent = colorText;
   $("sumClass").textContent = state.selectedClassRoom || "—";
@@ -622,13 +638,11 @@ function checkFormValid() {
   // 🔴 เช็กชื่อสกรีนแค่ตอนที่สินค้าไม่ใช่กางเกง
   if (!state.style.startsWith("กางเกง") && !$("backName").value.trim()) { ok = false; missing.push("ชื่อสกรีน"); }
   
-  // ... (โค้ดที่เหลือเหมือนเดิม)
   if (!$("firstName").value.trim()) { ok = false; missing.push("ชื่อ"); }
   if (!$("lastName").value.trim()) { ok = false; missing.push("นามสกุล"); }
   if (!$("customerEmail").value.includes("@")) { ok = false; missing.push("อีเมล"); }
   if ($("phone").value.replace(/\D/g,"").length < 9) { ok = false; missing.push("เบอร์โทร"); }
   
-  // ตรวจสอบคณะสีและห้อง
   if (!state.selectedTeamCategory) { ok = false; missing.push("คณะสีและห้องเรียน"); }
   else if (!state.selectedClassRoom) { ok = false; missing.push("ห้องเรียน"); }
   else if (!state.selectedClassNumber) { ok = false; missing.push("เลขที่"); }
@@ -659,6 +673,7 @@ $("submitBtn").addEventListener("click", async () => {
     const slipBase64 = await fileToBase64_(state.slipFile);
     
     const classRoomFull = state.selectedClassRoom + " เลขที่ " + state.selectedClassNumber;
+    const isPants = state.style.startsWith("กางเกง");
 
     const orderData = {
       idempotencyKey: state.idempotencyKey,
@@ -668,7 +683,7 @@ $("submitBtn").addEventListener("click", async () => {
       phone: $("phone").value.trim(),
       customerPin: $("customerPin").value.trim(),
       style: state.style, size: state.size,
-      backName: $("backName").value.trim(),
+      backName: isPants ? "" : $("backName").value.trim(),
       backNumber: $("backNumber").value.trim(),
       slipBase64, slipFilename: state.slipFilename || "slip.jpg",
       slipRef: state.slipRef || "", slipAmount: state.slipAmount,
@@ -711,9 +726,12 @@ async function drawDigitalTicket(orderId, name, backName, backNumber, classRoom,
   ctx.fillStyle = "#ffc107"; ctx.font = "bold 32px 'Kanit'"; ctx.fillText(orderId, c.width/2, 210);
   ctx.beginPath(); ctx.moveTo(60, 240); ctx.lineTo(c.width - 60, 240); ctx.strokeStyle = "#333"; ctx.stroke();
   ctx.textAlign = "left"; ctx.fillStyle = "#888"; ctx.font = "20px 'Sarabun'";
-  ctx.fillText("NAME:", 60, 290); ctx.fillText("CLASS:", 60, 340); ctx.fillText("STYLE:", 60, 390); ctx.fillText("SIZE:", 60, 440); ctx.fillText("BACK NAME:", 60, 490); ctx.fillText("NUMBER:", 60, 540); ctx.fillText("PRICE:", 60, 590);
+  ctx.fillText("NAME:", 60, 290); ctx.fillText("CLASS:", 60, 340); ctx.fillText("STYLE:", 60, 390); ctx.fillText("SIZE:", 60, 440);
+  if (backName) ctx.fillText("BACK NAME:", 60, 490);
+  ctx.fillText("NUMBER:", 60, 540); ctx.fillText("PRICE:", 60, 590);
   ctx.fillStyle = "#ffffff"; ctx.font = "bold 24px 'Kanit'";
-  ctx.fillText(name, 220, 290); ctx.fillText(classRoom, 220, 340); ctx.fillText(style, 220, 390); ctx.fillText(size, 220, 440); ctx.fillText(backName, 220, 490);
+  ctx.fillText(name, 220, 290); ctx.fillText(classRoom, 220, 340); ctx.fillText(style, 220, 390); ctx.fillText(size, 220, 440);
+  if (backName) ctx.fillText(backName, 220, 490);
   ctx.fillStyle = "#d32f2f"; ctx.font = "bold 60px 'Kanit'"; ctx.fillText(backNumber, 220, 560);
   ctx.fillStyle = "#ffffff"; ctx.font = "bold 32px 'Kanit'"; ctx.fillText("฿" + price, 220, 610);
   ctx.beginPath(); ctx.arc(c.width - 120, 680, 60, 0, Math.PI * 2); ctx.strokeStyle = "#d32f2f"; ctx.lineWidth = 4; ctx.stroke();
@@ -761,7 +779,9 @@ function resetForm() {
   state.selectedClassRoom = "";
   state.selectedClassNumber = "";
   state.selectedTeamCategory = "";
-   $("backNameGroup").style.display = "block";
+  state.style = "เสื้อสี";  // 🔴 reset สไตล์กลับค่าเริ่มต้น
+  $("backNameGroup").style.display = "block";
+  $("sumBackRow").style.display = "flex";
   
   $("selectedTeamDisplay").style.display = "none";
   $("selectedTeamText").textContent = "";
@@ -904,6 +924,7 @@ async function showOrderDetail(id) {
   const status = o.status || "รอตรวจสอบสลิป";
   const cls = trackingStatusClass(status);
   const priceLine = o.price ? `<div class="tracking-detail-row"><span>ยอดชำระ</span><strong style="color:var(--brand-red);">${formatTHB(o.price)}</strong></div>` : "";
+  const backNameLine = o.backName ? `<div class="tracking-detail-row"><span>ชื่อสกรีน</span><strong>${escapeHTML(o.backName)}</strong></div>` : "";
   $("historyPageContent").innerHTML = `
     <section class="tracking-order-heading">
       <div class="tracking-eyebrow">CHIANG SAEN GEAR · ORDER TRACKING</div>
@@ -915,7 +936,7 @@ async function showOrderDetail(id) {
       <h3>รายละเอียดคำสั่งซื้อ</h3>
       <div class="tracking-detail-row"><span>รูปแบบเสื้อ</span><strong>${escapeHTML(o.style || "—")}</strong></div>
       <div class="tracking-detail-row"><span>ไซซ์</span><strong>${escapeHTML(o.size || "—")}</strong></div>
-      <div class="tracking-detail-row"><span>ชื่อสกรีน</span><strong>${escapeHTML(o.backName || "—")}</strong></div>
+      ${backNameLine}
       <div class="tracking-detail-row"><span>เบอร์หลังเสื้อ</span><strong>${escapeHTML(o.backNumber || "—")}</strong></div>
       ${priceLine}
     </section>
@@ -1059,8 +1080,8 @@ function renderDashboard() {
 
   const sz = {};
   orders.forEach(o => { sz[o.size || "—"] = (sz[o.size || "—"] || 0) + 1; });
-  const order = { "SS":1, "S":2, "M":3, "L":4, "XL":5, "2XL":6, "3XL":7, "4XL":8, "5XL":9, "6XL":10 };
-  $("dashSizeList").innerHTML = Object.keys(sz).sort((a,b) => (order[a]||99) - (order[b]||99)).map(s => `<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg-input);border-radius:6px;font-size:13px;margin-bottom:6px;"><span>ไซซ์ ${escapeHTML(s)}</span><span style="font-weight:600;">${sz[s]} ตัว</span></div>`).join("") || "<p style='color:#888;font-size:13px;'>ไม่มีข้อมูล</p>";
+  const sizeOrder = { "SS":1, "S":2, "M":3, "L":4, "XL":5, "2XL":6, "3XL":7, "4XL":8, "5XL":9, "6XL":10 };
+  $("dashSizeList").innerHTML = Object.keys(sz).sort((a,b) => (sizeOrder[a]||99) - (sizeOrder[b]||99)).map(s => `<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg-input);border-radius:6px;font-size:13px;margin-bottom:6px;"><span>ไซซ์ ${escapeHTML(s)}</span><span style="font-weight:600;">${sz[s]} ตัว</span></div>`).join("") || "<p style='color:#888;font-size:13px;'>ไม่มีข้อมูล</p>";
 
   const cl = {};
   orders.forEach(o => { cl[o.classRoom || "—"] = (cl[o.classRoom || "—"] || 0) + 1; });
@@ -1101,13 +1122,14 @@ function renderAdminOrders() {
     item.style.cssText = "background:var(--bg-input);border:1px solid var(--border-color);border-radius:8px;padding:12px;display:flex;gap:12px;";
     
     const encodedSlipLink = encodeURIComponent(o.slipLink || "");
+    const backNameLine = o.backName ? ` / สกรีน: ${escapeHTML(o.backName)}` : "";
 
     item.innerHTML = `${img}<div style="flex:1;font-size:13px;color:var(--text-main);">
       <div style="font-weight:600;color:var(--brand-red);font-size:14px;margin-bottom:2px;">รหัส: ${escapeHTML(o.orderId || 'N/A')}</div>
       <div style="font-weight:600;">${escapeHTML(o.name || '—')} <span style="color:var(--text-muted);font-weight:400;">(${escapeHTML(o.classRoom || '-')})</span>${o.price ? ` <span style="color:var(--brand-red);font-weight:700;">฿${Number(o.price).toLocaleString("th-TH")}</span>` : ""}</div>
       <div style="color:var(--text-muted);">โทร: ${escapeHTML(o.phone || '-')}</div>
       <div style="color:var(--text-muted);font-size:12px;">อีเมล: ${escapeHTML(o.email || '—')}</div>
-      <div style="margin-top:4px;">เสื้อ: ${escapeHTML(o.style || '-')} / ไซซ์ ${escapeHTML(o.size || '-')} / สกรีน: ${escapeHTML(o.backName || '-')} (${escapeHTML(o.backNumber || '-')})</div>
+      <div style="margin-top:4px;">เสื้อ: ${escapeHTML(o.style || '-')} / ไซซ์ ${escapeHTML(o.size || '-')}${backNameLine} (${escapeHTML(o.backNumber || '-')})</div>
       <div style="margin-top:6px;font-weight:600;color:${sc};">สถานะ: ${escapeHTML(o.status)}</div>
       <div style="margin-top:6px;padding:8px;border-radius:6px;background:var(--bg-card);font-size:12px;">
         <div style="font-weight:700;margin-bottom:3px;">ผลตรวจสลิป (OCR)</div>
@@ -1268,6 +1290,10 @@ function updateCountdowns() {
 }
 setInterval(updateCountdowns, 1000); updateCountdowns();
 updateSummary(); checkFormValid();
+
+// 🔴 ผูกปุ่มยืนยันการเลือกกางเกง (pantsPreviewModal)
+const confirmPantsBtnEl = $("confirmPantsBtn");
+if (confirmPantsBtnEl) confirmPantsBtnEl.addEventListener("click", confirmPantsSelection);
 
 // แจ้งเตือนถ้ายังไม่ได้ตั้งค่า backend
 if (!BACKEND_READY) {
