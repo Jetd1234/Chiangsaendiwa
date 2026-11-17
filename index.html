@@ -140,7 +140,10 @@
     </div>
 
     <div class="card">
-      <h2><span class="num">3</span> ข้อมูลผู้สั่ง &amp; ห้องเรียน</h2>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <h2 style="margin:0;"><span class="num">3</span> ข้อมูลผู้สั่ง &amp; ห้องเรียน</h2>
+        <button type="button" id="toggleOtherTeamBtn" onclick="toggleOtherTeam()" style="padding:8px 14px;border-radius:10px;border:1px solid var(--brand-red);background:transparent;color:var(--brand-red);font-weight:700;cursor:pointer;">+ คณะสีอื่นๆ</button>
+      </div>
       <div class="row"><div><label for="firstName">ชื่อ</label><input id="firstName" placeholder="ชื่อ" autocomplete="given-name"></div><div><label for="lastName">นามสกุล</label><input id="lastName" placeholder="นามสกุล" autocomplete="family-name"></div></div>
       <label for="customerEmail">อีเมล (สำหรับรับแจ้งเตือนสถานะ + OTP ติดตาม)</label>
       <input id="customerEmail" type="email" placeholder="example@email.com" autocomplete="email">
@@ -151,7 +154,7 @@
       <label for="customerPin">ตั้งรหัส PIN 4 หลัก (สำหรับติดตามสถานะกรณีฉุกเฉิน)</label>
       <input id="customerPin" type="text" inputmode="numeric" maxlength="4" placeholder="เช่น 1234" autocomplete="off" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)">
       
-      <!-- 🆕 เลือกคณะสีแบบปุ่ม -->
+      <!-- เลือกคณะสี -->
       <label>เลือกคณะสี (เลือก 1 สี)</label>
       <div class="color-buttons" id="colorButtons" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
         <button type="button" class="color-btn" onclick="selectColor('สีแดง', this)" style="padding:8px 16px;border-radius:20px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);cursor:pointer;">สีแดง</button>
@@ -159,19 +162,24 @@
         <button type="button" class="color-btn" onclick="selectColor('สีฟ้า', this)" style="padding:8px 16px;border-radius:20px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);cursor:pointer;">สีฟ้า</button>
         <button type="button" class="color-btn" onclick="selectColor('สีม่วง', this)" style="padding:8px 16px;border-radius:20px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);cursor:pointer;">สีม่วง</button>
         <button type="button" class="color-btn" onclick="selectColor('สีชมพู', this)" style="padding:8px 16px;border-radius:20px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);cursor:pointer;">สีชมพู</button>
-        <button type="button" class="color-btn" onclick="selectColor('อื่นๆ', this)" style="padding:8px 16px;border-radius:20px;border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-main);cursor:pointer;">อื่นๆ</button>
-      </div>
-      
-      <!-- 🆕 ช่องพิมพ์สีอื่นๆ (ซ่อนไว้ก่อน) -->
-      <div id="customColorWrapper" style="display:none; margin-bottom:12px;">
-        <label for="customColorInput" style="font-size:13px;color:var(--text-muted);">ระบุสีอื่นๆ:</label>
-        <input id="customColorInput" placeholder="พิมพ์ชื่อสี..." autocomplete="off">
       </div>
 
-      <!-- ช่องห้องเรียน -->
-      <div>
-        <label for="classRoom">ระบุห้อง/เลขที่ (พิมพ์เอง)</label>
-        <input id="classRoom" placeholder="เช่น ม.5/1 เลขที่ 12" autocomplete="off">
+      <!-- แสดงเมื่อกดปุ่มคณะสีอื่นๆ -->
+      <div id="otherTeamWrapper" style="display:none;margin:0 0 14px;padding:14px;border:1px dashed var(--brand-red);border-radius:12px;">
+        <label for="otherTeamColor">ชื่อคณะสีอื่นๆ</label>
+        <input id="otherTeamColor" placeholder="เช่น คณะสีส้ม" autocomplete="off">
+      </div>
+
+      <!-- ห้องและเลขที่แยกช่องกัน ไม่รวมกับคณะสี -->
+      <div class="row">
+        <div>
+          <label for="classRoom">ห้องเรียน</label>
+          <input id="classRoom" placeholder="เช่น ม.5/1" autocomplete="off">
+        </div>
+        <div>
+          <label for="classNumber">เลขที่</label>
+          <input id="classNumber" inputmode="numeric" placeholder="เช่น 12" autocomplete="off">
+        </div>
       </div>
     </div>
 
@@ -184,6 +192,7 @@
         <div class="rowline"><span>เบอร์หลัง</span><span id="sumNumber">—</span></div>
         <div class="rowline"><span>คณะสี</span><span id="sumColor">—</span></div>
         <div class="rowline"><span>ห้องเรียน</span><span id="sumClass">—</span></div>
+        <div class="rowline"><span>เลขที่</span><span id="sumClassNumber">—</span></div>
         <div class="rowline total"><span>ยอดชำระ</span><span id="sumTotal">฿289</span></div>
       </div>
     </div>

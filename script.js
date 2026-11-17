@@ -101,7 +101,7 @@ function computePrice(basePrice, size, allow2XL) {
 
 const state = {
   style: "เสื้อสี", price: 289, basePrice: 289, surcharge: 0, size: "M", allow2XL: true,
-  selectedTeamColor: "",
+  selectedTeamColor: "", otherTeamOpen: false,
   slipFile: null, slipFilename: "", slipOCR: "", slipRef: "", slipAmount: null,
   slipAmountMatched: false, slipOCRDone: false,
   idempotencyKey: null, submitLocked: false,
@@ -182,41 +182,6 @@ function openTrackModal() {
   if (state.otpCooldownTimer) { clearInterval(state.otpCooldownTimer); state.otpCooldownTimer = null; }
 }
 function openSizeGuide() { $("sizeModal").style.display = "flex"; }
-
-// เลือกคณะสีจากปุ่ม
-function selectColor(colorName, btnElement) {
-  document.querySelectorAll('.color-btn').forEach(btn => {
-    btn.style.background = "var(--bg-input)";
-    btn.style.borderColor = "var(--border-color)";
-    btn.style.color = "var(--text-main)";
-    btn.style.fontWeight = "normal";
-    btn.setAttribute("aria-pressed", "false");
-  });
-
-  if (btnElement) {
-    btnElement.style.background = "var(--brand-red)";
-    btnElement.style.borderColor = "var(--brand-red)";
-    btnElement.style.color = "#fff";
-    btnElement.style.fontWeight = "bold";
-    btnElement.setAttribute("aria-pressed", "true");
-  }
-
-  state.selectedTeamColor = colorName;
-  const customWrapper = $("customColorWrapper");
-  const customInput = $("customColorInput");
-
-  if (colorName === "อื่นๆ") {
-    customWrapper.style.display = "block";
-    customInput.focus();
-  } else {
-    customWrapper.style.display = "none";
-    customInput.value = "";
-  }
-
-  updateSummary();
-  checkFormValid();
-  saveDraft();
-}
 function goBackHome() { $("screen-success").style.display = "none"; $("screen-form").style.display = "block"; resetForm(); window.scrollTo(0, 0); }
 function goBackFromHistory() { $("screen-history").style.display = "none"; $("screen-form").style.display = "block"; $("trackPhone").value = ""; window.scrollTo(0, 0); }
 
@@ -226,10 +191,8 @@ function saveDraft() {
     backName: $("backName").value, backNumber: $("backNumber").value,
     firstName: $("firstName").value, lastName: $("lastName").value,
     customerEmail: $("customerEmail").value, phone: $("phone").value,
-    customerPin: $("customerPin").value,
-    selectedTeamColor: state.selectedTeamColor,
-    customColor: $("customColorInput").value,
-    classRoom: $("classRoom").value,
+    customerPin: $("customerPin").value, teamColor: state.selectedTeamColor, otherTeamColor: $("otherTeamColor").value,
+    otherTeamOpen: state.otherTeamOpen, classRoom: $("classRoom").value, classNumber: $("classNumber").value, 
     style: state.style, size: state.size
   })); } catch (e) {}
 }
@@ -242,15 +205,19 @@ function restoreDraft() {
   $("customerEmail").value = d.customerEmail || ""; $("phone").value = d.phone || "";
   $("customerPin").value = d.customerPin || "";
   $("classRoom").value = d.classRoom || "";
-  $("customColorInput").value = d.customColor || "";
-  state.selectedTeamColor = d.selectedTeamColor || d.teamColor || "";
-  if (state.selectedTeamColor) {
-    const selectedBtn = Array.from(document.querySelectorAll(".color-btn"))
-      .find(b => b.textContent.trim() === state.selectedTeamColor);
-    if (selectedBtn) selectColor(state.selectedTeamColor, selectedBtn);
-    else state.selectedTeamColor = "";
-  }
-  $("customColorWrapper").style.display = state.selectedTeamColor === "อื่นๆ" ? "block" : "none";
+  $("classNumber").value = d.classNumber || "";
+  state.selectedTeamColor = d.teamColor || "";
+  document.querySelectorAll("#colorButtons .color-btn").forEach(b => {
+    const selected = b.textContent.trim() === state.selectedTeamColor;
+    b.classList.toggle("active", selected);
+    b.style.background = selected ? "var(--brand-red)" : "var(--bg-input)";
+    b.style.color = selected ? "#fff" : "var(--text-main)";
+    b.style.borderColor = selected ? "var(--brand-red)" : "var(--border-color)";
+  });
+  $("otherTeamColor").value = d.otherTeamColor || "";
+  state.otherTeamOpen = !!d.otherTeamOpen || !!d.otherTeamColor;
+  $("otherTeamWrapper").style.display = state.otherTeamOpen ? "block" : "none";
+  $("toggleOtherTeamBtn").textContent = state.otherTeamOpen ? "− ปิดคณะสีอื่นๆ" : "+ คณะสีอื่นๆ";
   
   if (d.style) {
     state.style = d.style;
@@ -458,28 +425,54 @@ document.querySelectorAll("#sizePicker .size-btn").forEach(btn => {
     if (state.slipFile && $("aiToggle").checked) await analyzeSlip(state.slipFile);
   });
 });
+function selectColor(colorName, btnElement) {
+  state.selectedTeamColor = colorName;
+  document.querySelectorAll("#colorButtons .color-btn").forEach(btn => {
+    const selected = btn === btnElement;
+    btn.classList.toggle("active", selected);
+    btn.style.background = selected ? "var(--brand-red)" : "var(--bg-input)";
+    btn.style.color = selected ? "#fff" : "var(--text-main)";
+    btn.style.borderColor = selected ? "var(--brand-red)" : "var(--border-color)";
+  });
+  updateSummary(); checkFormValid(); saveDraft();
+}
+function toggleOtherTeam() {
+  state.otherTeamOpen = !state.otherTeamOpen;
+  $("otherTeamWrapper").style.display = state.otherTeamOpen ? "block" : "none";
+  $("toggleOtherTeamBtn").textContent = state.otherTeamOpen ? "− ปิดคณะสีอื่นๆ" : "+ คณะสีอื่นๆ";
+  if (state.otherTeamOpen) {
+    state.selectedTeamColor = "";
+    document.querySelectorAll("#colorButtons .color-btn").forEach(btn => {
+      btn.classList.remove("active");
+      btn.style.background = "var(--bg-input)";
+      btn.style.color = "var(--text-main)";
+      btn.style.borderColor = "var(--border-color)";
+    });
+    $("otherTeamColor").focus();
+  } else {
+    $("otherTeamColor").value = "";
+  }
+  updateSummary(); checkFormValid(); saveDraft();
+}
+
 function updateSummary() {
   $("sumStyle").textContent = state.style;
   $("sumSize").textContent = state.size;
   $("sumBack").textContent = $("backName").value.trim() || "—";
   $("sumNumber").textContent = $("backNumber").value.trim() || "—";
-
-  let finalColor = state.selectedTeamColor;
-  if (finalColor === "อื่นๆ") finalColor = $("customColorInput").value.trim() || "อื่นๆ";
-  $("sumColor").textContent = finalColor || "—";
+  // แสดงคณะสี ห้องเรียน และเลขที่แยกจากกัน
+  const colorValue = state.otherTeamOpen ? $("otherTeamColor").value.trim() : state.selectedTeamColor;
+  $("sumColor").textContent = colorValue || "—";
   $("sumClass").textContent = $("classRoom").value.trim() || "—";
-
+  $("sumClassNumber").textContent = $("classNumber").value.trim() || "—";
+  
   const el = $("sumTotal");
   if (state.surcharge > 0) el.innerHTML = `${formatTHB(state.price)} <small>(ฐาน ${formatTHB(state.basePrice)} + ไซส์ ${state.size} ${formatTHB(state.surcharge)})</small>`;
   else el.textContent = formatTHB(state.price);
   if ($("payAmountBank")) $("payAmountBank").textContent = formatTHB(state.price);
 }
-
-["backName", "firstName", "lastName", "phone", "customerEmail", "customerPin", "classRoom"].forEach(id => {
+["backName","firstName","lastName","phone","customerEmail", "customerPin", "classRoom", "classNumber", "otherTeamColor"].forEach(id => {
   $(id).addEventListener("input", () => { updateSummary(); checkFormValid(); saveDraft(); });
-});
-$("customColorInput").addEventListener("input", () => {
-  updateSummary(); checkFormValid(); saveDraft();
 });
 
 function checkFormValid() {
@@ -488,13 +481,14 @@ function checkFormValid() {
   if (!$("firstName").value.trim()) { ok = false; missing.push("ชื่อ"); }
   if (!$("lastName").value.trim()) { ok = false; missing.push("นามสกุล"); }
   if (!$("customerEmail").value.includes("@")) { ok = false; missing.push("อีเมล"); }
-  if ($("phone").value.replace(/\D/g, "").length < 9) { ok = false; missing.push("เบอร์โทร"); }
-  if (!state.selectedTeamColor) { ok = false; missing.push("คณะสี"); }
-  if (state.selectedTeamColor === "อื่นๆ" && !$("customColorInput").value.trim()) { ok = false; missing.push("ระบุสีอื่นๆ"); }
-  if (!$("classRoom").value.trim()) { ok = false; missing.push("ห้องเรียน/เลขที่"); }
+  if ($("phone").value.replace(/\D/g,"").length < 9) { ok = false; missing.push("เบอร์โทร"); }
+  const chosenColor = state.otherTeamOpen ? $("otherTeamColor").value.trim() : state.selectedTeamColor;
+  if (!chosenColor) { ok = false; missing.push(state.otherTeamOpen ? "ชื่อคณะสีอื่นๆ" : "คณะสี"); }
+  if (!$("classRoom").value.trim()) { ok = false; missing.push("ห้องเรียน"); }
+  if (!$("classNumber").value.trim()) { ok = false; missing.push("เลขที่"); }
   if (!state.slipFile) { ok = false; missing.push("สลิปโอนเงิน"); }
-  if ($("customerPin").value.replace(/\D/g, "").length !== 4) { ok = false; missing.push("PIN 4 หลัก"); }
-
+  if ($("customerPin").value.replace(/\D/g,"").length !== 4) { ok = false; missing.push("PIN 4 หลัก"); }
+  
   const btn = $("submitBtn"), err = $("errorMsg");
   if (!BACKEND_READY) {
     err.innerHTML = "<span style='color:#dc3545;font-weight:bold;'>ระบบยังไม่ได้เชื่อมต่อ backend — กรุณาตั้งค่า googleScriptUrl ใน config.js</span>";
@@ -517,16 +511,14 @@ $("submitBtn").addEventListener("click", async () => {
     if (!state.idempotencyKey) state.idempotencyKey = newIdempotencyKey();
     const slipBase64 = await fileToBase64_(state.slipFile);
     
-    // 🆕 รวมสี และ ห้องเรียนเข้าด้วยกัน
-    const finalColor = state.selectedTeamColor === "อื่นๆ"
-      ? $("customColorInput").value.trim()
-      : state.selectedTeamColor;
-    const combinedClass = finalColor + " | " + $("classRoom").value.trim();
+    // ส่งคณะสี ห้องเรียน และเลขที่แยกฟิลด์ ไม่รวมคณะสีกับห้อง
 
     const orderData = {
       idempotencyKey: state.idempotencyKey,
       fullName: $("firstName").value.trim() + " " + $("lastName").value.trim(),
-      classRoom: combinedClass,
+      teamColor: state.otherTeamOpen ? $("otherTeamColor").value.trim() : state.selectedTeamColor,
+      classRoom: $("classRoom").value.trim(),
+      classNumber: $("classNumber").value.trim(),
       phone: $("phone").value.trim(),
       customerPin: $("customerPin").value.trim(),
       style: state.style, size: state.size,
@@ -617,16 +609,14 @@ async function copyToClipboard(t, msg) {
 }
 function resetForm() {
   $("screen-history").style.display = "none";
-  ["backName", "backNumber", "firstName", "lastName", "phone", "classRoom", "customerEmail", "customerPin", "customColorInput"].forEach(id => $(id).value = "");
-  state.selectedTeamColor = "";
-  document.querySelectorAll(".color-btn").forEach(btn => {
-    btn.style.background = "var(--bg-input)";
-    btn.style.borderColor = "var(--border-color)";
-    btn.style.color = "var(--text-main)";
-    btn.style.fontWeight = "normal";
-    btn.setAttribute("aria-pressed", "false");
+  ["backName","backNumber","firstName","lastName","phone","classRoom","classNumber","customerEmail","customerPin","otherTeamColor"].forEach(id => $(id).value = "");
+  state.selectedTeamColor = ""; state.otherTeamOpen = false;
+  $("otherTeamWrapper").style.display = "none";
+  $("toggleOtherTeamBtn").textContent = "+ คณะสีอื่นๆ";
+  document.querySelectorAll("#colorButtons .color-btn").forEach(btn => {
+    btn.classList.remove("active"); btn.style.background = "var(--bg-input)";
+    btn.style.color = "var(--text-main)"; btn.style.borderColor = "var(--border-color)";
   });
-  $("customColorWrapper").style.display = "none";
   $("numberPreviewBox").style.display = "none"; $("aiScannerBox").style.display = "none";
   state.slipFile = null; state.slipFilename = ""; state.slipOCR = ""; state.slipRef = "";
   state.slipAmount = null; state.slipAmountMatched = false; state.slipOCRDone = false;
