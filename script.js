@@ -1123,7 +1123,7 @@ function renderAdminOrders() {
       <div style="font-weight:600;">${escapeHTML(o.name || '—')} <span style="color:var(--text-muted);font-weight:400;">(${escapeHTML(o.classRoom || '-')})</span>${o.price ? ` <span style="color:var(--brand-red);font-weight:700;">฿${Number(o.price).toLocaleString("th-TH")}</span>` : ""}</div>
       <div style="color:var(--text-muted);">โทร: ${escapeHTML(o.phone || '-')}</div>
       <div style="color:var(--text-muted);font-size:12px;">อีเมล: ${escapeHTML(o.email || '—')}</div>
-      <div style="margin-top:4px;">เสื้อ: ${escapeHTML(o.style || '-')} / ไซซ์ ${escapeHTML(o.size || '-')}${backNameLine} (${escapeHTML(o.backNumber || '-')})</div>
+      <div style="margin-top:4px;">เสื้อ: ${escapeHTML(o.style || '-')} <span style="color:#888;">(ห้อง ${escapeHTML(o.classRoom || '-')})</span> / ไซซ์ ${escapeHTML(o.size || '-')}${backNameLine} (${escapeHTML(o.backNumber || '-')})</div>
       <div style="margin-top:6px;font-weight:600;color:${sc};">สถานะ: ${escapeHTML(o.status)}</div>
       <div style="margin-top:6px;padding:8px;border-radius:6px;background:var(--bg-card);font-size:12px;">
         <div style="font-weight:700;margin-bottom:3px;">ผลตรวจสลิป (OCR)</div>
