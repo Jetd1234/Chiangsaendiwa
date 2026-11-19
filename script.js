@@ -252,7 +252,8 @@ function restoreDraft() {
   
   if (d.style) {
     state.style = d.style;
-    if (["เสื้อสี", "เสื้อฟุตบอล", "เสื้อฟุตบอลม.ต้น", "เสื้อประตูมัธยมศึกษาตอนต้น", "เสื้อประตูมัธยมศึกษาตอนปลาย"].includes(d.style)) state.basePrice = 289;
+    // 🔴 เพิ่มชื่อให้ตรงกับที่โอน
+    if (["เสื้อสี", "เสื้อฟุตบอล", "เสื้อฟุตบอลม.ต้น", "เสื้อฟุตบอลม.ปลาย", "เสื้อประตูมัธยมศึกษาตอนต้น", "เสื้อประตูมัธยมศึกษาตอนปลาย"].includes(d.style)) state.basePrice = 289;
     else if (d.style.startsWith("กางเกง")) state.basePrice = 149;
     else state.basePrice = 279;
     state.allow2XL = !d.style.startsWith("กางเกง");
@@ -428,7 +429,8 @@ function selectProductFromModal() {
   $("backNameGroup").style.display = "block";
   $("sumBackRow").style.display = "flex";
 
-  if (["เสื้อสี", "เสื้อฟุตบอล", "เสื้อฟุตบอลม.ต้น", "เสื้อประตูมัธยมศึกษาตอนต้น", "เสื้อประตูมัธยมศึกษาตอนปลาย"].includes(selectedProductFromModal)) { 
+  // 🔴 เพิ่มชื่อให้ตรงกับที่โอน
+  if (["เสื้อสี", "เสื้อฟุตบอล", "เสื้อฟุตบอลม.ต้น", "เสื้อฟุตบอลม.ปลาย", "เสื้อประตูมัธยมศึกษาตอนต้น", "เสื้อประตูมัธยมศึกษาตอนปลาย"].includes(selectedProductFromModal)) { 
     state.basePrice = 289; state.allow2XL = true; 
   }
   else if (selectedProductFromModal.startsWith("กางเกง")) { 
