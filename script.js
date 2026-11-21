@@ -820,7 +820,8 @@ function buildStatusTimeline(status) {
   return `<div class="tracking-timeline">${stages.map((s, i) => `<div class="tracking-timeline-item ${idx >= i ? "completed" : ""} ${idx === i ? "active" : ""}"><div class="tracking-timeline-marker">${idx >= i ? "✓" : i + 1}</div><div class="tracking-timeline-copy"><strong>${s.n}${idx === i ? " · สถานะปัจจุบัน" : ""}</strong><p>${s.d}</p></div></div>`).join("")}</div>`;
 }
 async function loadOrderHistory(id) {
-  const r = await (await fetchWithRetry(`${GOOGLE_SCRIPT_URL}?action=get_order_history&orderid=${encodeURIComponent(id)}`, {}, { retries: 2, ms: 15000 })).json();
+  if (!state.trackToken) throw new Error("ต้องยืนยันตัวตนก่อน");
+  const r = await (await fetchWithRetry(`${GOOGLE_SCRIPT_URL}?action=get_order_history&orderid=${encodeURIComponent(id)}&token=${encodeURIComponent(state.trackToken)}`, {}, { retries: 2, ms: 15000 })).json();
   if (r.status !== "success" || !Array.isArray(r.data)) throw new Error(r.message || "อ่านประวัติไม่ได้");
   return r.data;
 }
@@ -911,7 +912,8 @@ async function verifyTrackPin() {
 async function showOrderDetail(id) {
   const resDiv = $("trackResult");
   resDiv.style.display = "block"; resDiv.className = "status-result loading"; resDiv.textContent = "กำลังโหลดข้อมูล...";
-  const r = await (await fetchWithRetry(`${GOOGLE_SCRIPT_URL}?action=track&orderid=${encodeURIComponent(id)}`, {}, { retries: 2, ms: 15000 })).json();
+  if (!state.trackToken) throw new Error("ต้องยืนยันตัวตนก่อน กรุณากรอก PIN อีกครั้ง");
+  const r = await (await fetchWithRetry(`${GOOGLE_SCRIPT_URL}?action=track&orderid=${encodeURIComponent(id)}&token=${encodeURIComponent(state.trackToken)}`, {}, { retries: 2, ms: 15000 })).json();
   if (r.status === "not_found") { resDiv.className = "status-result error"; resDiv.textContent = `ไม่พบคำสั่งซื้อรหัส ${id}`; return; }
   if (r.status !== "success" || !r.data) throw new Error(r.message || "ข้อมูลไม่ถูกต้อง");
   const o = r.data;
