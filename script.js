@@ -836,7 +836,7 @@ async function showOrderDetail(id) {
     const backNameLine = o.backName ? `<div class="tracking-detail-row"><span>ชื่อสกรีน</span><strong>${escapeHTML(o.backName)}</strong></div>` : "";
     $("historyPageContent").innerHTML = `
       <section class="tracking-order-heading">
-        <div class="tracking-eyebrow">CHIANG SAEN GEAR · ORDER TRACKING</div>
+        <div class="tracking-eyebrow">SIDANG · ORDER TRACKING</div>
         <div class="tracking-order-id">${escapeHTML(o.orderId || id)}</div>
         <div class="tracking-customer-name">คุณ ${escapeHTML(o.name || "ลูกค้า")}</div>
         <div class="tracking-order-date">สั่งซื้อเมื่อ ${escapeHTML(trackingFormatDate(o.date))}</div>
