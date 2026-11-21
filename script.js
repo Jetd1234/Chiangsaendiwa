@@ -376,7 +376,7 @@ function selectProductFromModal() {
   state.style = selectedProductFromModal;
   $("backNameGroup").style.display = "block";
   $("sumBackRow").style.display = "flex";
-  if (["เสื้อสี", "เสื้อฟุตบอล", "เสื้อฟุตบอลม.ต้น", "เสื้อฟุตบอลม.ปลาย", "เสื้อประตูมัธยมศึกษาตอนต้น", "เสื้อประตูมัธยมศึกษาตอนปลาย"].includes(selectedProductFromModal)) {
+  if (["เสื้อสี", "เสื้อวอลเลย์บอล", "เสื้อฟุตบอล", "เสื้อฟุตบอลม.ต้น", "เสื้อฟุตบอลม.ปลาย", "เสื้อประตูมัธยมศึกษาตอนต้น", "เสื้อประตูมัธยมศึกษาตอนปลาย"].includes(selectedProductFromModal)) {
     state.basePrice = 289; state.allow2XL = true;
   } else if (selectedProductFromModal.startsWith("กางเกง")) {
     state.basePrice = 149; state.allow2XL = false;
