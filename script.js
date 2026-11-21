@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────
-   CONFIG — อ่านค่าจาก config.js 
+   CONFIG — อ่านค่าจาก config.js
    ───────────────────────────────────────────────────────────── */
 const APP_CONFIG = Object.assign({
   googleScriptUrl: "",
@@ -18,7 +18,6 @@ const THEME_KEY = "theme";
 const SESSION_KEY = "cs69_admin_session";
 const ADMIN_IDLE_MS = 30 * 60 * 1000;
 
-// LocalStorage Wrapper (สำหรับ Safari Private Mode)
 const storage = (() => {
   try {
     const probe = "__cs69_probe__";
@@ -42,7 +41,6 @@ const storage = (() => {
 let customModalCallback = null;
 function showCustomModal(title, text, isConfirm = false, type = "success", imageUrl = null) {
   $("customModalTitle").textContent = title;
-  
   let imageHtml = "";
   if (imageUrl && imageUrl.startsWith("http")) {
     imageHtml = `<div style="margin-bottom: 16px; text-align: center;">
@@ -51,55 +49,28 @@ function showCustomModal(title, text, isConfirm = false, type = "success", image
       </a>
     </div>`;
   }
-  
   $("customModalText").innerHTML = imageHtml + `<div style="margin-top: 10px;">${text}</div>`;
-  
   const iconBox = $("customModalIcon");
   if (type === "success") {
     iconBox.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#28a745" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
   } else if (type === "warning") {
     iconBox.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#ffc107" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
   }
-
-  if (isConfirm) {
-    $("customModalCancelBtn").style.display = "block";
-  } else {
-    $("customModalCancelBtn").style.display = "none";
-  }
-  
+  $("customModalCancelBtn").style.display = isConfirm ? "block" : "none";
   $("customModal").style.display = "flex";
-  
-  return new Promise((resolve) => {
-    customModalCallback = resolve;
-  });
+  return new Promise((resolve) => { customModalCallback = resolve; });
 }
-
 function closeCustomModal() {
   $("customModal").style.display = "none";
-  if (customModalCallback) {
-    customModalCallback(false);
-    customModalCallback = null;
-  }
+  if (customModalCallback) { customModalCallback(false); customModalCallback = null; }
 }
-
 function handleCustomModalOk() {
   $("customModal").style.display = "none";
-  if (customModalCallback) {
-    customModalCallback(true);
-    customModalCallback = null;
-  }
+  if (customModalCallback) { customModalCallback(true); customModalCallback = null; }
 }
 
 // ─────────────── STATE & PRICING ───────────────
-const PRICE_RULES = { 
-  surcharge: { 
-    "2XL": 10, 
-    "3XL": 10, 
-    "4XL": 10, 
-    "5XL": 10,
-    "6XL": 10
-  } 
-};
+const PRICE_RULES = { surcharge: { "2XL": 10, "3XL": 10, "4XL": 10, "5XL": 10, "6XL": 10 } };
 
 function computePrice(basePrice, size, allow2XL) {
   const base = +basePrice || 0;
@@ -110,15 +81,9 @@ function computePrice(basePrice, size, allow2XL) {
 
 const state = {
   style: "เสื้อสี", price: 289, basePrice: 289, surcharge: 0, size: "M", allow2XL: true,
-  
-  selectedTeamColor: "",
-  selectedClassRoom: "",
-  selectedClassNumber: "",
-  selectedTeamCategory: "", // 'chiangsaen' หรือ 'other'
-
+  selectedTeamColor: "", selectedClassRoom: "", selectedClassNumber: "", selectedTeamCategory: "",
   slipFile: null, slipFilename: "", slipOCR: "", slipRef: "", slipAmount: null,
-  slipAmountMatched: false, slipOCRDone: false,
-  idempotencyKey: null, submitLocked: false,
+  slipAmountMatched: false, slipOCRDone: false, idempotencyKey: null, submitLocked: false,
   adminOrders: [], adminPage: 1, adminTotalPages: 1, adminStatusFilter: "",
   publicOrders: [], lastOrderId: null, adminName: "", trackToken: null,
   pendingTrackOrderId: null, otpCooldownTimer: null
@@ -146,6 +111,12 @@ async function fetchWithRetry(url, options = {}, { retries = 2, ms = 20000, back
     catch (err) { last = err; if (i < retries) await new Promise(r => setTimeout(r, backoff * (i + 1))); }
   }
   throw last;
+}
+async function safeJson(res) {
+  const text = await res.text();
+  if (!text) throw new Error("backend ตอบกลับว่างเปล่า");
+  try { return JSON.parse(text); }
+  catch (_) { throw new Error("backend ตอบไม่ใช่ JSON: " + text.slice(0, 120).replace(/\s+/g, " ")); }
 }
 function fileToBase64_(file) {
   return new Promise((resolve, reject) => {
@@ -205,11 +176,8 @@ function saveDraft() {
     backName: $("backName").value, backNumber: $("backNumber").value,
     firstName: $("firstName").value, lastName: $("lastName").value,
     customerEmail: $("customerEmail").value, phone: $("phone").value,
-    customerPin: $("customerPin").value, 
-    teamColor: state.selectedTeamColor,
-    teamCategory: state.selectedTeamCategory,
-    classRoom: state.selectedClassRoom,
-    classNumber: state.selectedClassNumber,
+    teamColor: state.selectedTeamColor, teamCategory: state.selectedTeamCategory,
+    classRoom: state.selectedClassRoom, classNumber: state.selectedClassNumber,
     otherRoom: $("otherRoom") ? $("otherRoom").value : "",
     otherClassNumber: $("otherClassNumber") ? $("otherClassNumber").value : "",
     csRoomLow: $("csRoomLow") ? $("csRoomLow").value : "",
@@ -225,23 +193,18 @@ function restoreDraft() {
   $("backName").value = d.backName || ""; $("backNumber").value = d.backNumber || "";
   $("firstName").value = d.firstName || ""; $("lastName").value = d.lastName || "";
   $("customerEmail").value = d.customerEmail || ""; $("phone").value = d.phone || "";
-  $("customerPin").value = d.customerPin || "";
-  
   if ($("otherRoom")) $("otherRoom").value = d.otherRoom || "";
   if ($("otherClassNumber")) $("otherClassNumber").value = d.otherClassNumber || "";
   if ($("csRoomLow")) $("csRoomLow").value = d.csRoomLow || "";
   if ($("csRoomHigh")) $("csRoomHigh").value = d.csRoomHigh || "";
   if ($("csClassNumber")) $("csClassNumber").value = d.csClassNumber || "";
-
   state.selectedTeamColor = d.teamColor || "";
   state.selectedTeamCategory = d.teamCategory || "";
   state.selectedClassRoom = d.classRoom || "";
   state.selectedClassNumber = d.classNumber || "";
-
   if (state.selectedTeamCategory) {
     updateTeamDisplay(state.selectedTeamCategory === 'chiangsaen' ? `คณะเชียงแสน (แดง) - ${state.selectedClassRoom} เลขที่ ${state.selectedClassNumber}` : `คณะ${state.selectedTeamColor} - ${state.selectedClassRoom} เลขที่ ${state.selectedClassNumber}`);
   }
-
   document.querySelectorAll("#otherColorButtons .color-btn").forEach(btn => {
     const btnText = btn.textContent.trim().split(" ")[0];
     const selected = btnText === state.selectedTeamColor;
@@ -249,22 +212,14 @@ function restoreDraft() {
     if(selected) { btn.style.background = "var(--brand-red)"; btn.style.color = "#fff"; btn.style.borderColor = "var(--brand-red)"; }
     else { btn.style.background = "var(--bg-input)"; btn.style.color = "var(--text-main)"; btn.style.borderColor = "var(--border-color)"; }
   });
-  
   if (d.style) {
     state.style = d.style;
-    // 🔴 เพิ่มชื่อให้ตรงกับที่โอน
     if (["เสื้อสี", "เสื้อฟุตบอล", "เสื้อฟุตบอลม.ต้น", "เสื้อฟุตบอลม.ปลาย", "เสื้อประตูมัธยมศึกษาตอนต้น", "เสื้อประตูมัธยมศึกษาตอนปลาย"].includes(d.style)) state.basePrice = 289;
     else if (d.style.startsWith("กางเกง")) state.basePrice = 149;
     else state.basePrice = 279;
     state.allow2XL = !d.style.startsWith("กางเกง");
-    
-    if (d.style.startsWith("กางเกง")) {
-      $("backNameGroup").style.display = "none";
-      $("sumBackRow").style.display = "none";
-    } else {
-      $("backNameGroup").style.display = "block";
-      $("sumBackRow").style.display = "flex";
-    }
+    if (d.style.startsWith("กางเกง")) { $("backNameGroup").style.display = "none"; $("sumBackRow").style.display = "none"; }
+    else { $("backNameGroup").style.display = "block"; $("sumBackRow").style.display = "flex"; }
   }
   if (d.size) {
     document.querySelectorAll("#sizePicker .size-btn").forEach(b => b.classList.toggle("active", b.dataset.size === d.size));
@@ -294,7 +249,7 @@ const checkPhoneLive = debounce(async function () {
   checkFormValid();
 }, 700);
 
-// ─────────────── OCR (AI อ่านสลิป) ───────────────
+// ─────────────── OCR ───────────────
 const SlipValidator = {
   normalizeDigits(t) { return String(t || "").replace(/[๐-๙]/g, d => "๐๑๒๓๔๕๖๗๘๙".indexOf(d)); },
   extractAllAmounts(t) {
@@ -317,8 +272,7 @@ function loadTesseract() {
   tesseractLoaderPromise = new Promise((resolve, reject) => {
     if (!src) { reject(new Error("ยังไม่ได้ตั้งค่า tesseractCdn ใน config.js")); return; }
     const s = document.createElement("script");
-    s.src = src;
-    s.async = true;
+    s.src = src; s.async = true;
     s.onload = () => (window.Tesseract ? resolve(window.Tesseract) : reject(new Error("โหลด Tesseract ไม่สำเร็จ")));
     s.onerror = () => { tesseractLoaderPromise = null; reject(new Error("โหลดตัวอ่านสลิปจาก CDN ไม่สำเร็จ")); };
     document.head.appendChild(s);
@@ -341,13 +295,10 @@ async function analyzeSlip(file) {
     const text = result?.data?.text || "";
     state.slipOCR = text;
     state.slipRef = SlipValidator.extractReference(text);
-    
-    const expected = Math.floor(Number(state.price)); 
+    const expected = Math.floor(Number(state.price));
     const allAmounts = SlipValidator.extractAllAmounts(text);
-    
     if (allAmounts.includes(expected)) {
-      state.slipAmount = expected;
-      state.slipAmountMatched = true;
+      state.slipAmount = expected; state.slipAmountMatched = true;
       $("aiStatusText").innerHTML = `อ่านยอดได้ <strong>${formatTHB(expected)}</strong> ตรงกับยอดสั่งซื้อ`;
     } else if (allAmounts.length > 0) {
       state.slipAmount = allAmounts[0];
@@ -411,11 +362,9 @@ function openProductModal(name, price, imgSrc, desc, allow2XL) {
   $("modalProductPrice").textContent = price + " THB";
   $("modalProductImg").src = imgSrc;
   $("modalProductDesc").textContent = desc;
-  
   document.querySelectorAll("#sizePicker .size-btn.surcharge").forEach(btn => {
     btn.style.display = allow2XL === false ? "none" : "block";
   });
-
   if (allow2XL === false && ["2XL", "3XL", "4XL", "5XL", "6XL"].includes(state.size)) {
     document.querySelector("#sizePicker .size-btn[data-size='M']").click();
   }
@@ -425,85 +374,55 @@ function selectProductFromModal() {
   if (!selectedProductFromModal) return;
   closeModal("productModal");
   state.style = selectedProductFromModal;
-  
   $("backNameGroup").style.display = "block";
   $("sumBackRow").style.display = "flex";
-
-  // 🔴 เพิ่มชื่อให้ตรงกับที่โอน
-  if (["เสื้อสี", "เสื้อฟุตบอล", "เสื้อฟุตบอลม.ต้น", "เสื้อฟุตบอลม.ปลาย", "เสื้อประตูมัธยมศึกษาตอนต้น", "เสื้อประตูมัธยมศึกษาตอนปลาย"].includes(selectedProductFromModal)) { 
-    state.basePrice = 289; state.allow2XL = true; 
-  }
-  else if (selectedProductFromModal.startsWith("กางเกง")) { 
-    state.basePrice = 149; state.allow2XL = false; 
-  }
-  else { 
-    state.basePrice = 279; state.allow2XL = true; 
+  if (["เสื้อสี", "เสื้อฟุตบอล", "เสื้อฟุตบอลม.ต้น", "เสื้อฟุตบอลม.ปลาย", "เสื้อประตูมัธยมศึกษาตอนต้น", "เสื้อประตูมัธยมศึกษาตอนปลาย"].includes(selectedProductFromModal)) {
+    state.basePrice = 289; state.allow2XL = true;
+  } else if (selectedProductFromModal.startsWith("กางเกง")) {
+    state.basePrice = 149; state.allow2XL = false;
+  } else {
+    state.basePrice = 279; state.allow2XL = true;
   }
   const calc = computePrice(state.basePrice, state.size, state.allow2XL);
   state.surcharge = calc.extra; state.price = calc.total;
   updateSummary(); checkFormValid(); saveDraft();
-  
   const anchor = $("otherColorButtons") || $("sizePicker");
   if (anchor) window.scrollTo({ top: anchor.offsetTop - 150, behavior: 'smooth' });
   toast("เลือกแบบ " + selectedProductFromModal + " แล้ว", "success");
 }
 
-// 🆕 ระบบกางเกง (พรีวิวรูปก่อนยืนยัน)
 let tempPantsSelection = { name: "", price: 0 };
 function openPantsModal() { $("pantsModal").style.display = "flex"; }
-
 function selectPants(name, price) {
   tempPantsSelection = { name, price };
-  
-  let imgUrl = "https://i.ibb.co/4Rgd4LFF/CS3.jpg"; 
-  if (name === "กางเกงฟุตบอล ม.ต้น") {
-    imgUrl = "https://i.ibb.co/b5Cs2rxq/CS1.jpg";
-  } 
-  else if (name === "กางเกงฟุตบอล ม.ต้น (ผู้รักษาประตู)") {
-    imgUrl = "https://i.ibb.co/N62pHKcZ/CS1-1.jpg";
-  } 
-  else if (name === "กางเกงฟุตบอล ม.ปลาย") {
-    imgUrl = "https://i.ibb.co/TxV7xH2z/CS2.jpg";
-  } 
-  else if (name === "กางเกงฟุตบอล ม.ปลาย (ผู้รักษาประตู)") {
-    imgUrl = "https://i.ibb.co/8LZ5v9my/CS2-1.jpg";
-  }
-
+  let imgUrl = "https://i.ibb.co/4Rgd4LFF/CS3.jpg";
+  if (name === "กางเกงฟุตบอล ม.ต้น") imgUrl = "https://i.ibb.co/b5Cs2rxq/CS1.jpg";
+  else if (name === "กางเกงฟุตบอล ม.ต้น (ผู้รักษาประตู)") imgUrl = "https://i.ibb.co/N62pHKcZ/CS1-1.jpg";
+  else if (name === "กางเกงฟุตบอล ม.ปลาย") imgUrl = "https://i.ibb.co/TxV7xH2z/CS2.jpg";
+  else if (name === "กางเกงฟุตบอล ม.ปลาย (ผู้รักษาประตู)") imgUrl = "https://i.ibb.co/8LZ5v9my/CS2-1.jpg";
   $("pantsPreviewImg").src = imgUrl;
   $("pantsPreviewTitle").textContent = name;
   $("pantsPreviewPrice").textContent = price + " THB";
-  
-  closeModal("pantsModal"); 
+  closeModal("pantsModal");
   $("pantsPreviewModal").style.display = "flex";
 }
-
 function confirmPantsSelection() {
   const { name, price } = tempPantsSelection;
   if (!name) return;
-
   closeModal("pantsPreviewModal");
-
   state.style = name;
   state.basePrice = price;
-  state.allow2XL = false; 
-  
+  state.allow2XL = false;
   $("backNameGroup").style.display = "none";
   $("backName").value = "";
   $("sumBackRow").style.display = "none";
-
   if (["2XL","3XL","4XL","5XL","6XL"].includes(state.size)) {
     const mBtn = document.querySelector("#sizePicker .size-btn[data-size='M']");
     if (mBtn) mBtn.click();
   }
-
   const calc = computePrice(state.basePrice, state.size, state.allow2XL);
-  state.surcharge = calc.extra; 
-  state.price = calc.total;
-  
-  updateSummary(); 
-  checkFormValid(); 
-  saveDraft();
-  
+  state.surcharge = calc.extra; state.price = calc.total;
+  updateSummary(); checkFormValid(); saveDraft();
   const anchor = $("otherColorButtons") || $("sizePicker");
   if (anchor) window.scrollTo({ top: anchor.offsetTop - 150, behavior: 'smooth' });
   toast("เลือกแบบ " + state.style + " แล้ว", "success");
@@ -523,80 +442,60 @@ document.querySelectorAll("#sizePicker .size-btn").forEach(btn => {
   });
 });
 
-// ─────────────── ระบบคณะสี (2 Dropdown) ───────────────
+// ─────────────── TEAM ───────────────
 function toggleTeamCategory(category) {
   const isCs = category === 'chiangsaen';
-  const btnCs = $("btnChiangsaen");
-  const panelCs = $("panelChiangsaen");
-  const btnOthers = $("btnOthers");
-  const panelOthers = $("panelOthers");
-  
+  const btnCs = $("btnChiangsaen"), panelCs = $("panelChiangsaen");
+  const btnOthers = $("btnOthers"), panelOthers = $("panelOthers");
   if (isCs) {
     const isOpen = panelCs.style.display === "block";
     panelCs.style.display = isOpen ? "none" : "block";
     btnCs.classList.toggle("active", !isOpen);
-    
     panelOthers.style.display = "none";
     btnOthers.classList.remove("active");
   } else {
     const isOpen = panelOthers.style.display === "block";
     panelOthers.style.display = isOpen ? "none" : "block";
     btnOthers.classList.toggle("active", !isOpen);
-    
     panelCs.style.display = "none";
     btnCs.classList.remove("active");
   }
 }
-
 function confirmChiangsaen() {
   const roomLow = $("csRoomLow").value;
   const roomHigh = $("csRoomHigh").value;
   const classNum = $("csClassNumber").value.trim();
-
   if (!roomLow && !roomHigh) { toast("กรุณาเลือกห้องเรียน (ม.ต้น หรือ ม.ปลาย)", "error"); return; }
   if (!classNum) { toast("กรุณากรอกเลขที่", "error"); return; }
-
   const finalRoom = roomLow ? roomLow : roomHigh;
-  
   state.selectedTeamColor = "เชียงแสน";
   state.selectedClassRoom = finalRoom;
   state.selectedClassNumber = classNum;
   state.selectedTeamCategory = "chiangsaen";
-
   updateTeamDisplay(`คณะเชียงแสน (แดง) - ${finalRoom} เลขที่ ${classNum}`);
-  
   $("panelChiangsaen").style.display = "none";
   $("btnChiangsaen").classList.remove("active");
-
   updateSummary(); checkFormValid(); saveDraft();
 }
-
 function confirmOtherTeam() {
   const color = state.selectedTeamColor;
   const room = $("otherRoom").value.trim();
   const classNum = $("otherClassNumber").value.trim();
-
   if (!color || color === "เชียงแสน") { toast("กรุณาเลือกคณะสีอื่นๆ ก่อน", "error"); return; }
   if (!room) { toast("กรุณากรอกห้องเรียน", "error"); return; }
   if (!classNum) { toast("กรุณากรอกเลขที่", "error"); return; }
-
   state.selectedClassRoom = room;
   state.selectedClassNumber = classNum;
   state.selectedTeamCategory = "other";
-
   updateTeamDisplay(`คณะ${color} - ${room} เลขที่ ${classNum}`);
-  
   $("panelOthers").style.display = "none";
   $("btnOthers").classList.remove("active");
-
   updateSummary(); checkFormValid(); saveDraft();
 }
-
 function updateTeamDisplay(text) {
   $("selectedTeamDisplay").style.display = "block";
   $("selectedTeamText").textContent = text;
 }
-
 function selectColor(colorName, btnElement) {
   if (colorName === "เชียงแสน") return;
   state.selectedTeamColor = colorName;
@@ -615,42 +514,35 @@ function updateSummary() {
   $("sumSize").textContent = state.size;
   $("sumBack").textContent = $("backName").value.trim() || "—";
   $("sumNumber").textContent = $("backNumber").value.trim() || "—";
-  
   const colorText = state.selectedTeamCategory === 'chiangsaen' ? "เชียงแสน" : (state.selectedTeamColor || "—");
   $("sumColor").textContent = colorText;
   $("sumClass").textContent = state.selectedClassRoom || "—";
   $("sumClassNumber").textContent = state.selectedClassNumber || "—";
-  
   const el = $("sumTotal");
   if (state.surcharge > 0) el.innerHTML = `${formatTHB(state.price)} <small>(ฐาน ${formatTHB(state.basePrice)} + ไซซ์ ${state.size} ${formatTHB(state.surcharge)})</small>`;
   else el.textContent = formatTHB(state.price);
   if ($("payAmountBank")) $("payAmountBank").textContent = formatTHB(state.price);
 }
-["backName","firstName","lastName","phone","customerEmail", "customerPin", "otherRoom", "otherClassNumber", "csClassNumber"].forEach(id => {
+["backName","firstName","lastName","phone","customerEmail","customerPin","otherRoom","otherClassNumber","csClassNumber"].forEach(id => {
   if($(id)) $(id).addEventListener("input", () => { updateSummary(); checkFormValid(); saveDraft(); });
 });
 
 function checkFormValid() {
   let ok = true, missing = [];
   if (!state.style.startsWith("กางเกง") && !$("backName").value.trim()) { ok = false; missing.push("ชื่อสกรีน"); }
-  
   if (!$("firstName").value.trim()) { ok = false; missing.push("ชื่อ"); }
   if (!$("lastName").value.trim()) { ok = false; missing.push("นามสกุล"); }
   if (!$("customerEmail").value.includes("@")) { ok = false; missing.push("อีเมล"); }
   if ($("phone").value.replace(/\D/g,"").length < 9) { ok = false; missing.push("เบอร์โทร"); }
-  
   if (!state.selectedTeamCategory) { ok = false; missing.push("คณะสีและห้องเรียน"); }
   else if (!state.selectedClassRoom) { ok = false; missing.push("ห้องเรียน"); }
   else if (!state.selectedClassNumber) { ok = false; missing.push("เลขที่"); }
-  
   if (!state.slipFile) { ok = false; missing.push("สลิปโอนเงิน"); }
   if ($("customerPin").value.replace(/\D/g,"").length !== 4) { ok = false; missing.push("PIN 4 หลัก"); }
-  
   const btn = $("submitBtn"), err = $("errorMsg");
   if (!BACKEND_READY) {
     err.innerHTML = "<span style='color:#dc3545;font-weight:bold;'>ระบบยังไม่ได้เชื่อมต่อ backend — กรุณาตั้งค่า googleScriptUrl ใน config.js</span>";
-    btn.disabled = true;
-    return;
+    btn.disabled = true; return;
   }
   if (isPhoneDuplicate) err.innerHTML = "<span style='color:#dc3545;font-weight:bold;'>เบอร์นี้เคยสั่งแล้ว! หากต้องการสั่งเพิ่มจริงๆ ให้กดปุ่มยืนยันด้านบน</span>";
   else err.textContent = ok ? "" : "กรุณาแก้ไข: " + missing.join(", ");
@@ -667,10 +559,8 @@ $("submitBtn").addEventListener("click", async () => {
   try {
     if (!state.idempotencyKey) state.idempotencyKey = newIdempotencyKey();
     const slipBase64 = await fileToBase64_(state.slipFile);
-    
     const classRoomFull = state.selectedClassRoom + " เลขที่ " + state.selectedClassNumber;
     const isPants = state.style.startsWith("กางเกง");
-
     const orderData = {
       idempotencyKey: state.idempotencyKey,
       fullName: $("firstName").value.trim() + " " + $("lastName").value.trim(),
@@ -686,8 +576,7 @@ $("submitBtn").addEventListener("click", async () => {
       expectedAmount: state.price, slipOCR: state.slipOCR || "",
       customerEmail: $("customerEmail").value.trim()
     };
-    orderData.pin = orderData.customerPin; 
-    
+    orderData.pin = orderData.customerPin;
     const r = await (await fetchWithRetry(GOOGLE_SCRIPT_URL, {
       method: "POST", body: JSON.stringify(orderData),
       headers: { "Content-Type": "text/plain;charset=utf-8" }
@@ -697,7 +586,6 @@ $("submitBtn").addEventListener("click", async () => {
     $("screen-form").style.display = "none";
     $("screen-success").style.display = "block";
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    
     const realId = r.orderId || "CS69-XXXX";
     await drawDigitalTicket(realId, orderData.fullName, orderData.backName, orderData.backNumber, orderData.classRoom, orderData.style, orderData.size, state.price);
     state.lastOrderId = realId;
@@ -749,12 +637,8 @@ async function shareTicket() {
 function buildShareUrl(search) {
   const base = String(APP_CONFIG.siteUrl || "").trim();
   let url;
-  if (base) {
-    url = new URL(base, window.location.href);
-  } else {
-    const path = window.location.pathname.replace(/index\.html?$/i, "") || "/";
-    url = new URL(path, window.location.origin);
-  }
+  if (base) url = new URL(base, window.location.href);
+  else { const path = window.location.pathname.replace(/index\.html?$/i, "") || "/"; url = new URL(path, window.location.origin); }
   url.search = search;
   return url.toString();
 }
@@ -770,25 +654,19 @@ async function copyToClipboard(t, msg) {
 }
 function resetForm() {
   $("screen-history").style.display = "none";
-  ["backName","backNumber","firstName","lastName","phone","classRoom","classNumber","customerEmail","customerPin", "otherRoom", "otherClassNumber", "csRoomLow", "csRoomHigh", "csClassNumber"].forEach(id => { if($(id)) $(id).value = ""; });
-  state.selectedTeamColor = "";
-  state.selectedClassRoom = "";
-  state.selectedClassNumber = "";
-  state.selectedTeamCategory = "";
-  state.style = "เสื้อสี";  
+  ["backName","backNumber","firstName","lastName","phone","classRoom","classNumber","customerEmail","customerPin","otherRoom","otherClassNumber","csRoomLow","csRoomHigh","csClassNumber"].forEach(id => { if($(id)) $(id).value = ""; });
+  state.selectedTeamColor = ""; state.selectedClassRoom = ""; state.selectedClassNumber = ""; state.selectedTeamCategory = "";
+  state.style = "เสื้อสี";
   $("backNameGroup").style.display = "block";
   $("sumBackRow").style.display = "flex";
-  
   $("selectedTeamDisplay").style.display = "none";
   $("selectedTeamText").textContent = "";
-  
   document.querySelectorAll("#otherColorButtons .color-btn").forEach(btn => {
     btn.classList.remove("active"); btn.style.background = "var(--bg-input)";
     btn.style.color = "var(--text-main)"; btn.style.borderColor = "var(--border-color)";
   });
   $("panelChiangsaen").style.display = "none"; $("btnChiangsaen").classList.remove("active");
   $("panelOthers").style.display = "none"; $("btnOthers").classList.remove("active");
-
   $("numberPreviewBox").style.display = "none"; $("aiScannerBox").style.display = "none";
   state.slipFile = null; state.slipFilename = ""; state.slipOCR = ""; state.slipRef = "";
   state.slipAmount = null; state.slipAmountMatched = false; state.slipOCRDone = false;
@@ -805,8 +683,18 @@ function resetForm() {
 }
 
 // ─────────────── TRACKING / OTP / PIN ───────────────
-function trackingFormatDate(v) { if (!v) return "ไม่ระบุเวลา"; const d = new Date(v); if (Number.isNaN(d.getTime())) return escapeHTML(v); return d.toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" }); }
-function trackingStatusClass(s) { if (s === "จัดส่งแล้ว") return "delivered"; if (s === "กำลังผลิต") return "producing"; if (s === "ยกเลิก" || s === "สลิปไม่ผ่าน") return "cancelled"; return "pending"; }
+function trackingFormatDate(v) {
+  if (!v) return "ไม่ระบุเวลา";
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return String(v);
+  return d.toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" });
+}
+function trackingStatusClass(s) {
+  if (s === "จัดส่งแล้ว") return "delivered";
+  if (s === "กำลังผลิต") return "producing";
+  if (s === "ยกเลิก" || s === "สลิปไม่ผ่าน") return "cancelled";
+  return "pending";
+}
 function buildStatusTimeline(status) {
   const stages = [
     { n: "รอตรวจสอบสลิป", d: "รอแอดมินตรวจสอบการชำระเงิน" },
@@ -819,14 +707,19 @@ function buildStatusTimeline(status) {
   const idx = stages.findIndex(s => s.n === status);
   return `<div class="tracking-timeline">${stages.map((s, i) => `<div class="tracking-timeline-item ${idx >= i ? "completed" : ""} ${idx === i ? "active" : ""}"><div class="tracking-timeline-marker">${idx >= i ? "✓" : i + 1}</div><div class="tracking-timeline-copy"><strong>${s.n}${idx === i ? " · สถานะปัจจุบัน" : ""}</strong><p>${s.d}</p></div></div>`).join("")}</div>`;
 }
+
 async function loadOrderHistory(id) {
   if (!state.trackToken) throw new Error("ต้องยืนยันตัวตนก่อน");
-  const r = await (await fetchWithRetry(`${GOOGLE_SCRIPT_URL}?action=get_order_history&orderid=${encodeURIComponent(id)}&token=${encodeURIComponent(state.trackToken)}`, {}, { retries: 2, ms: 15000 })).json();
-  if (r.status !== "success" || !Array.isArray(r.data)) throw new Error(r.message || "อ่านประวัติไม่ได้");
-  return r.data;
+  const res = await fetchWithRetry(
+    `${GOOGLE_SCRIPT_URL}?action=get_order_history&orderid=${encodeURIComponent(id)}&token=${encodeURIComponent(state.trackToken)}`,
+    {}, { retries: 1, ms: 15000 }
+  );
+  const r = await safeJson(res);
+  if (r.status !== "success") throw new Error(r.message || "อ่านประวัติไม่ได้");
+  return Array.isArray(r.data) ? r.data : [];
 }
 function renderOrderHistory(h) {
-  if (!h.length) return `<div class="tracking-empty-history">ยังไม่มีประวัติ</div>`;
+  if (!Array.isArray(h) || !h.length) return `<div class="tracking-empty-history">ยังไม่มีประวัติ</div>`;
   return `<div class="tracking-history-list">${h.map(i => `<div class="tracking-history-item"><span class="tracking-history-dot"></span><div class="tracking-history-content"><strong>${escapeHTML(i.newStatus || "อัปเดต")}</strong><span>${escapeHTML(trackingFormatDate(i.changedAt))}</span>${i.changedBy ? `<small>ผู้ดำเนินการ: ${escapeHTML(i.changedBy)}</small>` : ""}</div></div>`).join("")}</div>`;
 }
 
@@ -836,14 +729,15 @@ async function requestTrackOtp() {
   const resDiv = $("trackResult"), btn = $("trackBtn");
   if (!/^CS69-\d{4}$/.test(id)) { resDiv.style.display = "block"; resDiv.className = "status-result error"; resDiv.textContent = "กรุณากรอกรหัสออเดอร์รูปแบบ CS69-1234"; return; }
   if (phone.replace(/\D/g,"").length < 9) { resDiv.style.display = "block"; resDiv.className = "status-result error"; resDiv.textContent = "กรุณากรอกเบอร์โทรที่ใช้สั่งซื้อ"; return; }
-  
   const orig = btn.textContent; btn.textContent = "กำลังส่ง OTP..."; btn.disabled = true;
   resDiv.style.display = "block"; resDiv.className = "status-result loading"; resDiv.textContent = "กำลังส่ง OTP...";
-  
   try {
-    const r = await (await fetchWithRetry(`${GOOGLE_SCRIPT_URL}?action=request_otp&orderid=${encodeURIComponent(id)}&phone=${encodeURIComponent(phone)}`, {}, { retries: 1, ms: 20000 })).json();
+    const res = await fetchWithRetry(
+      `${GOOGLE_SCRIPT_URL}?action=request_otp&orderid=${encodeURIComponent(id)}&phone=${encodeURIComponent(phone)}`,
+      {}, { retries: 1, ms: 20000 }
+    );
+    const r = await safeJson(res);
     if (r.status !== "success") throw new Error(r.message || "ส่ง OTP ไม่สำเร็จ");
-    
     state.pendingTrackOrderId = id;
     $("trackStage1").style.display = "none";
     $("trackStage2").style.display = "block";
@@ -852,103 +746,124 @@ async function requestTrackOtp() {
     startOtpCooldown(60);
   } catch (e) {
     resDiv.className = "status-result error";
-    resDiv.innerHTML = "เกิดข้อผิดพลาด: " + e.message + "<br><br><a href='https://line.me/ti/p/qx4pTpyFEH' target='_blank' style='color:#0d6efd;text-decoration:underline;'>👉 กดที่นี่เพื่อติดต่อแอดมินทาง LINE</a>";
-  } finally { btn.textContent = orig; btn.disabled = false; }
+    resDiv.innerHTML = "เกิดข้อผิดพลาด: " + escapeHTML(e.message) + "<br><br><a href='https://line.me/ti/p/qx4pTpyFEH' target='_blank' style='color:#0d6efd;text-decoration:underline;'>ติดต่อแอดมินทาง LINE</a>";
+  } finally {
+    btn.textContent = orig; btn.disabled = false;
+  }
 }
 function startOtpCooldown(sec) {
   const btn = $("resendOtpBtn"), cd = $("resendCountdown");
   if (!btn || !cd) return;
-  if (state.otpCooldownTimer) clearInterval(state.otpCooldownTimer);
-  let left = sec;
-  btn.disabled = true; cd.textContent = left;
+  if (state.otpCooldownTimer) { clearInterval(state.otpCooldownTimer); state.otpCooldownTimer = null; }
+  let left = sec; btn.disabled = true; cd.textContent = left;
   state.otpCooldownTimer = setInterval(() => {
     left--;
-    if (left <= 0) {
-      clearInterval(state.otpCooldownTimer); state.otpCooldownTimer = null;
-      btn.disabled = false; cd.textContent = "0";
-    } else cd.textContent = left;
+    if (left <= 0) { clearInterval(state.otpCooldownTimer); state.otpCooldownTimer = null; btn.disabled = false; cd.textContent = "0"; }
+    else cd.textContent = left;
   }, 1000);
 }
 async function verifyTrackOtp() {
   const otp = $("otpInput").value.trim();
   const id = state.pendingTrackOrderId;
   const resDiv = $("trackResult"), btn = $("otpVerifyBtn");
-  if (!otp) { resDiv.style.display = "block"; resDiv.className = "status-result error"; resDiv.textContent = "กรุณากรอก OTP"; return; }
+  if (!id) { resDiv.style.display = "block"; resDiv.className = "status-result error"; resDiv.textContent = "ไม่พบรหัสออเดอร์ — กรุณากลับไปกรอกใหม่"; return; }
+  if (!/^\d{6}$/.test(otp)) { resDiv.style.display = "block"; resDiv.className = "status-result error"; resDiv.textContent = "OTP ต้องเป็นตัวเลข 6 หลัก"; return; }
   const orig = btn.textContent; btn.textContent = "กำลังตรวจสอบ..."; btn.disabled = true;
+  resDiv.style.display = "block"; resDiv.className = "status-result loading"; resDiv.textContent = "กำลังตรวจสอบ OTP...";
   try {
-    const r = await (await fetchWithRetry(`${GOOGLE_SCRIPT_URL}?action=verify_otp&orderid=${encodeURIComponent(id)}&otp=${encodeURIComponent(otp)}`, {}, { retries: 1, ms: 20000 })).json();
-    if (r.status !== "success" || !r.trackToken) throw new Error(r.message || "OTP ไม่ถูกต้อง");
+    const res = await fetchWithRetry(
+      `${GOOGLE_SCRIPT_URL}?action=verify_otp&orderid=${encodeURIComponent(id)}&otp=${encodeURIComponent(otp)}`,
+      {}, { retries: 1, ms: 20000 }
+    );
+    const r = await safeJson(res);
+    if (r.status !== "success") throw new Error(r.message || "OTP ไม่ถูกต้อง");
+    if (!r.trackToken) throw new Error("backend ไม่ได้ส่ง trackToken (ตรวจสอบ Apps Script)");
     state.trackToken = r.trackToken;
     await showOrderDetail(id);
   } catch (e) {
     resDiv.style.display = "block"; resDiv.className = "status-result error";
-    resDiv.textContent = "OTP ไม่ถูกต้องหรือหมดอายุ (" + e.message + ")";
-  } finally { btn.textContent = orig; btn.disabled = false; }
+    resDiv.textContent = "ตรวจสอบไม่สำเร็จ: " + e.message;
+  } finally {
+    btn.textContent = orig; btn.disabled = false;
+  }
 }
 async function verifyTrackPin() {
   const id = $("trackPhone").value.trim().toUpperCase();
   const phone = $("trackPhoneConfirm").value.trim();
   const pin = $("trackPinInput").value.trim();
   const resDiv = $("trackResult"), btn = $("trackPinBtn");
-  
   if (!/^CS69-\d{4}$/.test(id)) { resDiv.style.display = "block"; resDiv.className = "status-result error"; resDiv.textContent = "กรุณากรอกรหัสออเดอร์รูปแบบ CS69-1234"; return; }
   if (phone.replace(/\D/g,"").length < 9) { resDiv.style.display = "block"; resDiv.className = "status-result error"; resDiv.textContent = "กรุณากรอกเบอร์โทรที่ใช้สั่งซื้อ"; return; }
   if (!/^\d{4}$/.test(pin)) { resDiv.style.display = "block"; resDiv.className = "status-result error"; resDiv.textContent = "กรุณากรอก PIN 4 หลัก"; return; }
-
   const orig = btn.textContent; btn.textContent = "กำลังตรวจสอบ..."; btn.disabled = true;
-  resDiv.style.display = "block"; resDiv.className = "status-result loading"; resDiv.textContent = "กำลังตรวจสอบ...";
-  
+  resDiv.style.display = "block"; resDiv.className = "status-result loading"; resDiv.textContent = "กำลังตรวจสอบ PIN...";
   try {
-    const r = await (await fetchWithRetry(`${GOOGLE_SCRIPT_URL}?action=verify_pin&orderid=${encodeURIComponent(id)}&phone=${encodeURIComponent(phone)}&pin=${encodeURIComponent(pin)}`, {}, { retries: 1, ms: 20000 })).json();
-    if (r.status !== "success" || !r.trackToken) throw new Error(r.message || "PIN ไม่ถูกต้อง");
-    
+    const res = await fetchWithRetry(
+      `${GOOGLE_SCRIPT_URL}?action=verify_pin&orderid=${encodeURIComponent(id)}&phone=${encodeURIComponent(phone)}&pin=${encodeURIComponent(pin)}`,
+      {}, { retries: 1, ms: 20000 }
+    );
+    const r = await safeJson(res);
+    if (r.status !== "success") throw new Error(r.message || "PIN ไม่ถูกต้อง");
+    if (!r.trackToken) throw new Error("backend ไม่ได้ส่ง trackToken (ตรวจสอบ Apps Script)");
     state.trackToken = r.trackToken;
+    state.pendingTrackOrderId = id;
     await showOrderDetail(id);
   } catch (e) {
     resDiv.className = "status-result error";
     resDiv.textContent = "ตรวจสอบไม่สำเร็จ: " + e.message;
-  } finally { btn.textContent = orig; btn.disabled = false; }
+  } finally {
+    btn.textContent = orig; btn.disabled = false;
+  }
 }
 async function showOrderDetail(id) {
   const resDiv = $("trackResult");
   resDiv.style.display = "block"; resDiv.className = "status-result loading"; resDiv.textContent = "กำลังโหลดข้อมูล...";
-  if (!state.trackToken) throw new Error("ต้องยืนยันตัวตนก่อน กรุณากรอก PIN อีกครั้ง");
-  const r = await (await fetchWithRetry(`${GOOGLE_SCRIPT_URL}?action=track&orderid=${encodeURIComponent(id)}&token=${encodeURIComponent(state.trackToken)}`, {}, { retries: 2, ms: 15000 })).json();
-  if (r.status === "not_found") { resDiv.className = "status-result error"; resDiv.textContent = `ไม่พบคำสั่งซื้อรหัส ${id}`; return; }
-  if (r.status !== "success" || !r.data) throw new Error(r.message || "ข้อมูลไม่ถูกต้อง");
-  const o = r.data;
-  let history = [], historyMsg = "";
-  try { history = await loadOrderHistory(id); } catch (e) { historyMsg = "ขณะนี้ยังโหลดประวัติย้อนหลังไม่ได้"; }
-  const status = o.status || "รอตรวจสอบสลิป";
-  const cls = trackingStatusClass(status);
-  const priceLine = o.price ? `<div class="tracking-detail-row"><span>ยอดชำระ</span><strong style="color:var(--brand-red);">${formatTHB(o.price)}</strong></div>` : "";
-  const backNameLine = o.backName ? `<div class="tracking-detail-row"><span>ชื่อสกรีน</span><strong>${escapeHTML(o.backName)}</strong></div>` : "";
-  $("historyPageContent").innerHTML = `
-    <section class="tracking-order-heading">
-      <div class="tracking-eyebrow">CHIANG SAEN GEAR · ORDER TRACKING</div>
-      <div class="tracking-order-id">${escapeHTML(o.orderId || id)}</div>
-      <div class="tracking-customer-name">คุณ ${escapeHTML(o.name || "ลูกค้า")}</div>
-      <div class="tracking-order-date">สั่งซื้อเมื่อ ${escapeHTML(trackingFormatDate(o.date))}</div>
-    </section>
-    <section class="tracking-detail-card">
-      <h3>รายละเอียดคำสั่งซื้อ</h3>
-      <div class="tracking-detail-row"><span>รูปแบบเสื้อ</span><strong>${escapeHTML(o.style || "—")}</strong></div>
-      <div class="tracking-detail-row"><span>ไซซ์</span><strong>${escapeHTML(o.size || "—")}</strong></div>
-      ${backNameLine}
-      <div class="tracking-detail-row"><span>เบอร์หลังเสื้อ</span><strong>${escapeHTML(o.backNumber || "—")}</strong></div>
-      ${priceLine}
-    </section>
-    <section class="tracking-current-card ${cls}">
-      <div class="tracking-current-label">สถานะปัจจุบัน</div>
-      <div class="tracking-current-status">${escapeHTML(status)}</div>
-    </section>
-    <section class="tracking-section"><h3>ความคืบหน้า</h3>${buildStatusTimeline(status)}</section>
-    <section class="tracking-section"><h3>ประวัติการอัปเดต</h3>${historyMsg ? `<p class="tracking-history-warning">${escapeHTML(historyMsg)}</p>` : ""}${renderOrderHistory(history)}</section>
-    <button type="button" class="btn btn-primary" style="margin-top:16px;" onclick="trackOrderAgain('${escapeHTML(id)}')">ตรวจสอบอีกครั้ง</button>`;
-  closeModal("trackModal");
-  $("screen-form").style.display = "none";
-  $("screen-history").style.display = "block";
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  try {
+    if (!state.trackToken) throw new Error("ต้องยืนยันตัวตนก่อน กรุณากรอก PIN หรือ OTP ใหม่");
+    const res = await fetchWithRetry(
+      `${GOOGLE_SCRIPT_URL}?action=track&orderid=${encodeURIComponent(id)}&token=${encodeURIComponent(state.trackToken)}`,
+      {}, { retries: 2, ms: 15000 }
+    );
+    const r = await safeJson(res);
+    if (r.status === "not_found") { resDiv.className = "status-result error"; resDiv.textContent = `ไม่พบคำสั่งซื้อรหัส ${id}`; return; }
+    if (r.status !== "success" || !r.data) throw new Error(r.message || "ข้อมูลไม่ถูกต้อง");
+    const o = r.data;
+    let history = [], historyMsg = "";
+    try { history = await loadOrderHistory(id); } catch (e) { historyMsg = "โหลดประวัติย้อนหลังไม่ได้: " + e.message; }
+    const status = o.status || "รอตรวจสอบสลิป";
+    const cls = trackingStatusClass(status);
+    const priceLine = o.price ? `<div class="tracking-detail-row"><span>ยอดชำระ</span><strong style="color:var(--brand-red);">${formatTHB(o.price)}</strong></div>` : "";
+    const backNameLine = o.backName ? `<div class="tracking-detail-row"><span>ชื่อสกรีน</span><strong>${escapeHTML(o.backName)}</strong></div>` : "";
+    $("historyPageContent").innerHTML = `
+      <section class="tracking-order-heading">
+        <div class="tracking-eyebrow">CHIANG SAEN GEAR · ORDER TRACKING</div>
+        <div class="tracking-order-id">${escapeHTML(o.orderId || id)}</div>
+        <div class="tracking-customer-name">คุณ ${escapeHTML(o.name || "ลูกค้า")}</div>
+        <div class="tracking-order-date">สั่งซื้อเมื่อ ${escapeHTML(trackingFormatDate(o.date))}</div>
+      </section>
+      <section class="tracking-detail-card">
+        <h3>รายละเอียดคำสั่งซื้อ</h3>
+        <div class="tracking-detail-row"><span>รูปแบบเสื้อ</span><strong>${escapeHTML(o.style || "—")}</strong></div>
+        <div class="tracking-detail-row"><span>ไซซ์</span><strong>${escapeHTML(o.size || "—")}</strong></div>
+        ${backNameLine}
+        <div class="tracking-detail-row"><span>เบอร์หลังเสื้อ</span><strong>${escapeHTML(o.backNumber || "—")}</strong></div>
+        ${priceLine}
+      </section>
+      <section class="tracking-current-card ${cls}">
+        <div class="tracking-current-label">สถานะปัจจุบัน</div>
+        <div class="tracking-current-status">${escapeHTML(status)}</div>
+      </section>
+      <section class="tracking-section"><h3>ความคืบหน้า</h3>${buildStatusTimeline(status)}</section>
+      <section class="tracking-section"><h3>ประวัติการอัปเดต</h3>${historyMsg ? `<p class="tracking-history-warning">${escapeHTML(historyMsg)}</p>` : ""}${renderOrderHistory(history)}</section>
+      <button type="button" class="btn btn-primary" style="margin-top:16px;" onclick="trackOrderAgain('${escapeHTML(id)}')">ตรวจสอบอีกครั้ง</button>`;
+    closeModal("trackModal");
+    $("screen-form").style.display = "none";
+    $("screen-history").style.display = "block";
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (e) {
+    resDiv.style.display = "block"; resDiv.className = "status-result error";
+    resDiv.textContent = "โหลดข้อมูลไม่สำเร็จ: " + e.message;
+  }
 }
 function trackOrderAgain(id) {
   $("screen-history").style.display = "none"; $("screen-form").style.display = "block";
@@ -956,6 +871,7 @@ function trackOrderAgain(id) {
   $("trackResult").style.display = "none";
   $("trackStage1").style.display = "block"; $("trackStage2").style.display = "none";
   state.pendingTrackOrderId = null; state.trackToken = null;
+  if (state.otpCooldownTimer) { clearInterval(state.otpCooldownTimer); state.otpCooldownTimer = null; }
 }
 
 // ─────────────── ADMIN ───────────────
@@ -1066,7 +982,6 @@ function renderDashboard() {
   $("dashReceivedRevenue").textContent = formatTHB(received);
   if (pending > 0) { $("dashPendingRevenue").textContent = formatTHB(pending) + " (รอตรวจสลิป)"; $("dashPendingRevenue").style.color = "#dc3545"; }
   else { $("dashPendingRevenue").textContent = "ไม่มีเงินค้าง"; $("dashPendingRevenue").style.color = "#198754"; }
-
   const sc = {};
   orders.forEach(o => { sc[o.status] = (sc[o.status] || 0) + 1; });
   const sColor = { "รอตรวจสอบสลิป":"#ffc107","ยืนยันเงินแล้ว":"#17a2b8","กำลังผลิต":"#0d6efd","จัดส่งแล้ว":"#198754","สลิปไม่ผ่าน":"#dc3545" };
@@ -1075,12 +990,10 @@ function renderDashboard() {
     const p = total > 0 ? (sc[st] / total) * 100 : 0;
     return `<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span style="color:${c};font-weight:600;">${escapeHTML(st)}</span><span>${sc[st]}</span></div><div style="height:6px;background:var(--border-color);border-radius:3px;overflow:hidden;margin-bottom:10px;"><div style="height:100%;width:${p}%;background:${c};"></div></div>`;
   }).join("") || "<p style='color:#888;font-size:13px;'>ไม่มีข้อมูล</p>";
-
   const sz = {};
   orders.forEach(o => { sz[o.size || "—"] = (sz[o.size || "—"] || 0) + 1; });
   const sizeOrder = { "SS":1, "S":2, "M":3, "L":4, "XL":5, "2XL":6, "3XL":7, "4XL":8, "5XL":9, "6XL":10 };
   $("dashSizeList").innerHTML = Object.keys(sz).sort((a,b) => (sizeOrder[a]||99) - (sizeOrder[b]||99)).map(s => `<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg-input);border-radius:6px;font-size:13px;margin-bottom:6px;"><span>ไซซ์ ${escapeHTML(s)}</span><span style="font-weight:600;">${sz[s]} ตัว</span></div>`).join("") || "<p style='color:#888;font-size:13px;'>ไม่มีข้อมูล</p>";
-
   const cl = {};
   orders.forEach(o => { cl[o.classRoom || "—"] = (cl[o.classRoom || "—"] || 0) + 1; });
   $("dashClassList").innerHTML = Object.keys(cl).sort((a,b) => cl[b] - cl[a]).slice(0,5).map(c => `<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg-input);border-radius:6px;font-size:13px;margin-bottom:6px;"><span>${escapeHTML(c)}</span><span style="font-weight:600;">${cl[c]} คน</span></div>`).join("") || "<p style='color:#888;font-size:13px;'>ไม่มีข้อมูล</p>";
@@ -1107,21 +1020,16 @@ function renderAdminOrders() {
     else if (o.status === "กำลังผลิต") sc = "#0d6efd";
     else if (o.status === "จัดส่งแล้ว") sc = "#198754";
     else if (o.status === "ยกเลิก" || o.status === "สลิปไม่ผ่าน") sc = "#dc3545";
-    
-    const canV = o.status === "รอตรวจสอบสลิป"; 
-    const canP = o.status === "ยืนยันเงินแล้ว" || o.status === "กำลังผลิต"; 
-    const canCancel = o.status !== "จัดส่งแล้ว" && o.status !== "ยกเลิก"; 
-
+    const canV = o.status === "รอตรวจสอบสลิป";
+    const canP = o.status === "ยืนยันเงินแล้ว" || o.status === "กำลังผลิต";
+    const canCancel = o.status !== "จัดส่งแล้ว" && o.status !== "ยกเลิก";
     let img = `<div style="width:60px;height:60px;background:var(--bg-card);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-muted);border:1px solid var(--border-color);">ไม่มีรูป</div>`;
     if (o.slipLink && o.slipLink.startsWith("http")) img = `<a href="${escapeHTML(o.slipLink)}" target="_blank" rel="noopener"><img src="${escapeHTML(o.slipLink)}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid var(--border-color);"></a>`;
     else if (o.slipLink === "เงินสด") img = `<div style="width:60px;height:60px;background:var(--bg-card);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#d97706;border:1px solid var(--border-color);">เงินสด</div>`;
-    
     const item = document.createElement("div");
     item.style.cssText = "background:var(--bg-input);border:1px solid var(--border-color);border-radius:8px;padding:12px;display:flex;gap:12px;";
-    
     const encodedSlipLink = encodeURIComponent(o.slipLink || "");
     const backNameLine = o.backName ? ` / สกรีน: ${escapeHTML(o.backName)}` : "";
-
     item.innerHTML = `${img}<div style="flex:1;font-size:13px;color:var(--text-main);">
       <div style="font-weight:600;color:var(--brand-red);font-size:14px;margin-bottom:2px;">รหัส: ${escapeHTML(o.orderId || 'N/A')}</div>
       <div style="font-weight:600;">${escapeHTML(o.name || '—')} <span style="color:var(--text-muted);font-weight:400;">(${escapeHTML(o.classRoom || '-')})</span>${o.price ? ` <span style="color:var(--brand-red);font-weight:700;">฿${Number(o.price).toLocaleString("th-TH")}</span>` : ""}</div>
@@ -1135,16 +1043,12 @@ function renderAdminOrders() {
         <div style="color:var(--text-muted);margin-top:3px;">OCR ไม่ใช่หลักฐานยืนยันเงินเข้า ต้องกด "ยืนยันเงิน" ก่อนเริ่มผลิต</div>
       </div></div>
       <div style="display:flex;flex-direction:column;gap:4px;justify-content:center;">
-        
         ${canV ? `
           <button style="background:#17a2b8;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;" onclick="verifyPayment(${o.rowIndex}, '${escapeHTML(o.orderId)}', '${encodedSlipLink}')">ยืนยันเงิน</button>
           <button style="background:#dc3545;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;" onclick="rejectPayment(${o.rowIndex}, '${escapeHTML(o.orderId)}')">สลิปไม่ผ่าน</button>
         ` : ""}
-        
         <button ${canP ? "" : "disabled"} style="background:${canP ? "#0d6efd" : "#6c757d"};color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:${canP ? "pointer" : "not-allowed"};" onclick="updateStatus(${o.rowIndex}, 'กำลังผลิต', '${escapeHTML(o.name || "")}')">เริ่มผลิต</button>
-        
         <button ${canP ? "" : "disabled"} style="background:${canP ? "#198754" : "#6c757d"};color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:${canP ? "pointer" : "not-allowed"};" onclick="updateStatus(${o.rowIndex}, 'จัดส่งแล้ว', '${escapeHTML(o.name || "")}')">จัดส่งแล้ว</button>
-        
         <button ${canCancel ? "" : "disabled"} style="background:${canCancel ? "#dc3545" : "#6c757d"};color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:${canCancel ? "pointer" : "not-allowed"};" onclick="updateStatus(${o.rowIndex}, 'ยกเลิก', '${escapeHTML(o.name || "")}')">ยกเลิก</button>
       </div>`;
     list.appendChild(item);
@@ -1153,12 +1057,9 @@ function renderAdminOrders() {
 async function verifyPayment(rowIndex, orderId, encodedSlipLink) {
   const session = storage.getItem(SESSION_KEY);
   if (!session) { toast("Session หมดอายุ", "error"); showAdminLogin(); return; }
-  
   const slipLink = decodeURIComponent(encodedSlipLink || "");
-
   const isConfirmed = await showCustomModal("ยืนยันการรับเงิน", `ยืนยันว่าเงินของออเดอร์ <b>${orderId}</b> เข้าบัญชีแล้วใช่มั้ย`, true, "warning", slipLink);
   if (!isConfirmed) return;
-  
   try {
     const r = await (await fetchWithRetry(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "verify_payment", sessionToken: session, rowIndex }), headers: { "Content-Type": "text/plain;charset=utf-8" } }, { retries: 1, ms: 30000 })).json();
     if (r.status === "success") { toast("ยืนยันเงินแล้ว", "success"); loadAdminOrders(state.adminPage); }
@@ -1168,10 +1069,8 @@ async function verifyPayment(rowIndex, orderId, encodedSlipLink) {
 async function rejectPayment(rowIndex, orderId) {
   const session = storage.getItem(SESSION_KEY);
   if (!session) { toast("Session หมดอายุ", "error"); showAdminLogin(); return; }
-  
   const reason = prompt("เหตุผลที่สลิปไม่ผ่าน (เช่น ยอดไม่ตรง, สลิปซ้ำ):", "");
   if (reason === null) return;
-  
   try {
     const r = await (await fetchWithRetry(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "reject_payment", sessionToken: session, rowIndex, reason: reason.trim() }), headers: { "Content-Type": "text/plain;charset=utf-8" } }, { retries: 1, ms: 30000 })).json();
     if (r.status === "success") { toast("ปฏิเสธสลิปแล้ว", "success"); loadAdminOrders(state.adminPage); }
@@ -1181,10 +1080,8 @@ async function rejectPayment(rowIndex, orderId) {
 async function updateStatus(rowIndex, newStatus, customerName) {
   const session = storage.getItem(SESSION_KEY);
   if (!session) { toast("Session หมดอายุ", "error"); showAdminLogin(); return; }
-  
   const isConfirmed = await showCustomModal("เปลี่ยนสถานะ", `ต้องการเปลี่ยนสถานะเป็น <b>"${newStatus}"</b> ใช่มั้ย`, true, "warning");
   if (!isConfirmed) return;
-  
   toast("กำลังบันทึกสถานะ...", "loading");
   try {
     const r = await (await fetchWithRetry(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "update_status", sessionToken: session, rowIndex, newStatus, customerName, adminName: state.adminName || "admin" }), headers: { "Content-Type": "text/plain;charset=utf-8" } }, { retries: 1, ms: 30000 })).json();
@@ -1201,18 +1098,13 @@ async function updateStatus(rowIndex, newStatus, customerName) {
 async function generateManualOtp() {
   const session = storage.getItem(SESSION_KEY);
   if (!session) return toast("Session หมดอายุ", "error");
-
   const orderId = prompt("กรุณากรอกรหัสออเดอร์ (เช่น CS69-1234):");
   if (!orderId) return;
-
   try {
     const r = await (await fetchWithRetry(`${GOOGLE_SCRIPT_URL}?action=admin_gen_otp&token=${encodeURIComponent(session)}&orderid=${encodeURIComponent(orderId)}`, {}, { retries: 1 })).json();
-    
     if (r.status === "success") {
       showCustomModal("สร้าง OTP สำเร็จ!", `รหัส OTP ของ <b>${orderId}</b> คือ:<br><br><span style="font-size:24px;font-family:monospace;color:var(--brand-red);letter-spacing:4px;">${r.otp}</span><br><br><small>กรุณาแจ้งลูกค้าทางแชท</small>`, false, "success");
-    } else {
-      toast(r.message || "ไม่สำเร็จ", "error");
-    }
+    } else toast(r.message || "ไม่สำเร็จ", "error");
   } catch (e) { toast("เชื่อมต่อล้มเหลว", "error"); }
 }
 function exportCSV() {
